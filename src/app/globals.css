@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Google Fonts: Fraunces (variable serif) + Inter ─── */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* ─── Custom Properties ─── */
+:root {
+  --color-bg: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-text: #1F1C17;
+  --color-text-muted: #7D6F5C;
+  --color-border: #E8DDD0;
+  --color-accent: #F59E0B;
+  --color-accent-hover: #D97706;
+  --color-terra: #DC5A36;
+  --color-sage: #65904F;
+  --color-gold: #F59E0B;
+}
+
+.dark {
+  --color-bg: #12100D;
+  --color-surface: #1F1C17;
+  --color-text: #F3EDE6;
+  --color-text-muted: #998C78;
+  --color-border: #312C24;
+  --color-accent: #FFB633;
+  --color-accent-hover: #F59E0B;
+}
+
+/* ─── Base ─── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: rgba(245, 158, 11, 0.2);
+  color: #1F1C17;
+}
+
+.dark ::selection {
+  background: rgba(255, 182, 51, 0.3);
+  color: #F3EDE6;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D4C4B0;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4A4136;
+}
+
+/* ─── Skeleton shimmer ─── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #F3EDE6 25%,
+    #E8DDD0 50%,
+    #F3EDE6 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    #312C24 25%,
+    #3F312A 50%,
+    #312C24 75%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ─── Glassmorphism ─── */
+.glass {
+  background: rgba(250, 248, 245, 0.78);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(232, 221, 208, 0.5);
+}
+
+.dark .glass {
+  background: rgba(18, 16, 13, 0.78);
+  border: 1px solid rgba(49, 44, 36, 0.5);
+}
+
+/* ─── Noise texture overlay ─── */
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Button ripple ─── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0);
+  animation: rippleAnim 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes rippleAnim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ─── Diagonal section dividers ─── */
+.diagonal-top {
+  clip-path: polygon(0 6%, 100% 0, 100% 100%, 0 100%);
+}
+.diagonal-bottom {
+  clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
+}
+
+/* ─── Focus visible ─── */
+*:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ─── Grain overlay for editorial feel ─── */
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 0;
+}
