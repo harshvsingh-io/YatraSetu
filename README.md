@@ -6,12 +6,14 @@
 
 **A civic-travel-tech platform that bridges tourism and restoration**
 
+**100% Free Stack — No credit card needed for anything!**
+
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Three.js](https://img.shields.io/badge/Three.js-3D-white?style=for-the-badge&logo=three.js)](https://threejs.org/)
-[![Framer Motion](https://img.shields.io/badge/Framer-Motion-animation-dd004f?style=for-the-badge)](https://www.framer.com/motion/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-Map-2D-green?style=for-the-badge)](https://leafletjs.com/)
 
 ---
 
@@ -21,7 +23,7 @@
 
 Book your trip. Join a restoration event. Earn rewards. Make tourism a force for good.
 
-[🔗 Live Demo](#-getting-started) · [📦 Deploy on Vercel](#-deploy-on-vercel) · [📄 API Setup](#-environment-variables)
+[🔗 Live Demo](#-getting-started) · [📦 Deploy on Vercel](#-deploy-on-vercel)
 
 </div>
 
@@ -31,13 +33,30 @@ Book your trip. Join a restoration event. Earn rewards. Make tourism a force for
 
 YatraSetu ("setu" = bridge) is a full-stack travel platform that combines **live trip-booking discovery** with a **verified community restoration layer**. Users can:
 
-1. **Discover & Book** — Search destinations, browse hotels/attractions with live Google Places data, check weather, and find transport
+1. **Discover & Book** — Search destinations, browse hotels/attractions with live OpenStreetMap data, check weather
 2. **Join Restoration Events** — RSVP to verified local clean-up/plantation events near their destination
 3. **QR-Verified Check-In** — Anti-fraud rotating QR system with geo-tagged selfie backup
 4. **Earn Rewards** — Stamps from verified participation, redeemable on hotels, transport, and local deals
 5. **Track Impact** — See collective metrics: waste collected, participant-hours, sites restored
 
 **Core loop:** `Sign in → Discover destination → Live booking options → RSVP to restoration event → QR check-in → Rewards → Redeem on next trip`
+
+---
+
+## 💰 100% Free Stack
+
+**No credit card needed for any service!**
+
+| Service | Free Tier | Credit Card? |
+|---------|----------|-------------|
+| **Supabase** | 500MB DB, 50K users/month | ❌ No |
+| **OpenStreetMap + Nominatim** | Unlimited map tiles + search | ❌ No |
+| **Leaflet** | Unlimited map rendering | ❌ No |
+| **React Three Fiber** | Unlimited 3D rendering | ❌ No |
+| **OpenWeatherMap** | 1,000 API calls/day | ❌ No |
+| **Vercel** | Unlimited deploys, 100GB bandwidth | ❌ No |
+| **GitHub** | Unlimited public repos | ❌ No |
+| **Google Cloud** | Not needed — we use free alternatives! | ❌ No |
 
 ---
 
@@ -58,12 +77,13 @@ yatrasetu/
 │   │   ├── trending/           # Trending spot alerts
 │   │   ├── community-apply/    # Community lead application
 │   │   ├── api/                # Server-side API routes
-│   │   │   ├── places/         # Google Places proxy
+│   │   │   ├── places/         # OpenStreetMap/Nominatim search
 │   │   │   └── weather/        # OpenWeatherMap proxy
 │   │   └── auth/callback/      # Supabase OAuth callback
 │   ├── components/             # Reusable UI components
 │   │   ├── Hero.tsx            # Landing hero with 3D map
-│   │   ├── IndiaMap3D.tsx      # Interactive 3D India map
+│   │   ├── IndiaMap3D.tsx      # Interactive 3D India map (Three.js)
+│   │   ├── LeafletMap.tsx      # 2D map with pins (Leaflet + OSM)
 │   │   ├── Navbar.tsx          # Glassmorphism sticky nav
 │   │   ├── Button.tsx          # Spring-physics CTA buttons
 │   │   ├── TiltCard.tsx        # 3D tilt-on-hover cards
@@ -75,7 +95,7 @@ yatrasetu/
 │   ├── lib/                    # Utilities & hooks
 │   │   ├── supabase.ts         # Browser Supabase client
 │   │   ├── supabase-server.ts  # Server Supabase client
-│   │   ├── useLivePlaces.ts    # Google Places data hook
+│   │   ├── useLivePlaces.ts    # OpenStreetMap data hook
 │   │   ├── useLiveWeather.ts   # Weather data hook
 │   │   └── utils.ts            # cn(), formatNumber()
 │   └── middleware.ts           # Auth route protection
@@ -120,7 +140,6 @@ yatrasetu/
 - **Node.js** 18+ (recommended: 20)
 - **npm** or **yarn**
 - A **Supabase** project ([create free](https://supabase.com))
-- A **Google Cloud** project with Places + Maps APIs enabled
 - An **OpenWeatherMap** API key ([get free](https://openweathermap.org/api))
 
 ### 1. Clone & Install
@@ -140,22 +159,17 @@ cp .env.local.example .env.local
 ```
 
 ```env
-# ─── Supabase ───────────────────────────────────────
+# ─── Supabase (Free tier — no card needed) ───────────
 # Get from: Supabase Dashboard → Project Settings → API
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR...
 
-# ─── Google APIs ────────────────────────────────────
-# Get from: Google Cloud Console → APIs & Services → Credentials
-NEXT_PUBLIC_GOOGLE_PLACES_API_KEY=AIzaSy...
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSy...
-
-# ─── Weather ────────────────────────────────────────
-# Get from: https://openweathermap.org/api (free tier)
+# ─── OpenWeatherMap (Free — 1000 calls/day) ──────────
+# Get from: https://openweathermap.org/api (free signup)
 OPENWEATHERMAP_API_KEY=your_openweathermap_key
 ```
 
-> **Note:** The app works without API keys — seeded fallback data is used automatically. No broken screens.
+> **Note:** The app works without any API keys — seeded fallback data is used automatically. No broken screens.
 
 ### 3. Supabase Auth Setup
 
@@ -192,23 +206,31 @@ npx vercel
 
 ### Vercel Environment Variables
 
-Go to your Vercel project → **Settings → Environment Variables** and add all the same keys from your `.env.local`.
+Go to your Vercel project → **Settings → Environment Variables** and add:
 
-> **Important:** Set `SUPABASE_SERVICE_ROLE_KEY` only as a server-side env var (not `NEXT_PUBLIC_`).
+| # | Variable | Value | Source |
+|---|----------|-------|--------|
+| 1 | `NEXT_PUBLIC_SUPABASE_URL` | `https://xxx.supabase.co` | Supabase Settings → API |
+| 2 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGci...` | Supabase Settings → API |
+| 3 | `OPENWEATHERMAP_API_KEY` | `xxxxxx` | openweathermap.org |
+
+**That's it — only 3 variables!** Everything else is free and keyless.
 
 ---
 
 ## 📡 API Reference
 
-### Google Places API
+### OpenStreetMap/Nominatim Places API
 - **Route:** `/api/places?q=destination&type=hotel|attraction`
-- **Returns:** Name, rating, photos, price level, reviews
+- **Returns:** Name, rating, photos, address, coordinates
 - **Fallback:** Seeded data for popular Indian destinations
+- **Cost:** Free (no API key needed)
 
 ### OpenWeatherMap API
 - **Route:** `/api/weather?q=city_name`
 - **Returns:** Current weather + 3-day forecast
 - **Fallback:** Mock weather data
+- **Cost:** Free (1,000 calls/day)
 
 ### Supabase Auth
 - **Google OAuth:** `supabase.auth.signInWithOAuth({ provider: 'google' })`
@@ -220,7 +242,7 @@ Go to your Vercel project → **Settings → Environment Variables** and add all
 
 | Route | Page | Features |
 |-------|------|----------|
-| `/` | Landing | 3D India map, GSAP parallax, impact counters, testimonials |
+| `/` | Landing | 3D India map, Leaflet map, GSAP parallax, impact counters, testimonials |
 | `/login` | Auth | Google OAuth + Phone OTP, split-panel design |
 | `/discover` | Discover | Destination search, hotel cards, weather, transport links |
 | `/events` | Events | Filter/browse, RSVP, verified badges, safety waiver |
@@ -235,30 +257,31 @@ Go to your Vercel project → **Settings → Environment Variables** and add all
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | Next.js 14 (App Router) |
-| **Language** | TypeScript 5.7 |
-| **Styling** | Tailwind CSS 3.4 |
-| **Animation** | Framer Motion 11 + GSAP 3.12 |
-| **3D** | React Three Fiber 8 + drei 9 |
-| **Auth** | Supabase Auth (Google OAuth + Phone OTP) |
-| **Database** | Supabase (PostgreSQL + Row Level Security) |
-| **Maps** | Google Places API + Maps JavaScript API |
-| **Weather** | OpenWeatherMap API |
-| **Charts** | Recharts |
-| **Icons** | Lucide React |
-| **Deploy** | Vercel |
+| Layer | Technology | Free? |
+|-------|-----------|-------|
+| **Framework** | Next.js 14 (App Router) | ✅ Free |
+| **Language** | TypeScript 5.7 | ✅ Free |
+| **Styling** | Tailwind CSS 3.4 | ✅ Free |
+| **Animation** | Framer Motion 11 + GSAP 3.12 | ✅ Free |
+| **3D** | React Three Fiber 8 + drei 9 | ✅ Free |
+| **Maps (2D)** | Leaflet + OpenStreetMap | ✅ Free, no key |
+| **Places Search** | Nominatim (OpenStreetMap) | ✅ Free, no key |
+| **Auth** | Supabase Auth (Google OAuth + Phone OTP) | ✅ Free |
+| **Database** | Supabase (PostgreSQL + RLS) | ✅ Free |
+| **Weather** | OpenWeatherMap API | ✅ Free |
+| **Charts** | Recharts | ✅ Free |
+| **Icons** | Lucide React | ✅ Free |
+| **Deploy** | Vercel | ✅ Free |
 
 ---
 
 ## 🔒 Security
 
-- All API keys restricted by domain/referrer where supported
 - Supabase Row Level Security enabled
 - Auth middleware protects private routes
 - Phone OTP with 30s cooldown to prevent spam
 - `SUPABASE_SERVICE_ROLE_KEY` only on server-side (never exposed to client)
+- No Google API keys needed (uses free OSM alternatives)
 
 ---
 
