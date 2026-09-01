@@ -117,7 +117,7 @@ export default function Hero() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
               <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-700">
                 <Sparkles className="h-3.5 w-3.5" />
-                Smart India Hackathon 2024
+                Smart India Hackathon 2026
               </span>
             </motion.div>
 
