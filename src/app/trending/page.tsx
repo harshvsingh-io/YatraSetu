@@ -17,6 +17,8 @@ import {
   CheckCircle2,
   TrendingUp,
   Clock,
+  Users,
+  Trash2,
 } from "lucide-react";
 
 const recentAlerts = [
@@ -158,21 +160,21 @@ export default function TrendingPage() {
                       </label>
                       <div className="mt-1.5 grid grid-cols-3 gap-2">
                         {[
-                          { id: "overcrowding" as const, label: "Overcrowding", emoji: "👥" },
-                          { id: "waste" as const, label: "Waste Overflow", emoji: "🗑️" },
-                          { id: "damage" as const, label: "Damage Report", emoji: "⚠️" },
+                          { id: "overcrowding" as const, label: "Overcrowding", icon: Users },
+                          { id: "waste" as const, label: "Waste Overflow", icon: Trash2 },
+                          { id: "damage" as const, label: "Damage Report", icon: AlertTriangle },
                         ].map((t) => (
                           <button
                             key={t.id}
                             onClick={() => setType(t.id)}
                             className={cn(
-                              "flex flex-col items-center gap-1 rounded-xl border-2 px-3 py-3 text-sm font-medium transition-all",
+                              "flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 text-sm font-medium transition-all",
                               type === t.id
                                 ? "border-terra-400 bg-terra-50 text-terra-700"
                                 : "border-ink-200 text-ink-600 hover:border-ink-300"
                             )}
                           >
-                            <span className="text-xl">{t.emoji}</span>
+                            <t.icon className="h-5 w-5 text-ink-700" />
                             <span className="text-xs">{t.label}</span>
                           </button>
                         ))}

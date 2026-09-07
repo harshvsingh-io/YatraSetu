@@ -7,11 +7,34 @@ import { CheckCircle2, XCircle, AlertTriangle, X, Info } from "lucide-react";
 
 type ToastType = "success" | "error" | "warning" | "info";
 
-interface Toast { id: number; type: ToastType; message: string; }
-interface ToastContextValue { addToast: (type: ToastType, message: string) => void; }
+interface Toast {
+  id: number;
+  type: ToastType;
+  message: string;
+  title?: string;
+}
 
-const ToastContext = createContext<ToastContextValue>({ addToast: () => {} });
-export function useToast() { return useContext(ToastContext); }
+export interface ToastOptions {
+  title?: string;
+  message?: string;
+  description?: string;
+  variant?: "default" | "destructive" | "success" | "warning";
+  type?: ToastType;
+}
+
+interface ToastContextValue {
+  addToast: (type: ToastType, message: string) => void;
+  toast: (opts: ToastOptions | string) => void;
+}
+
+const ToastContext = createContext<ToastContextValue>({
+  addToast: () => {},
+  toast: () => {},
+});
+
+export function useToast() {
+  return useContext(ToastContext);
+}
 
 const iconMap: Record<ToastType, React.ReactNode> = {
   success: <CheckCircle2 className="h-5 w-5 text-sage-500" />,
@@ -30,16 +53,26 @@ const bgColorMap: Record<ToastType, string> = {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((type: ToastType, message: string) => {
+  const addToast = useCallback((type: ToastType, message: string, title?: string) => {
     const id = Date.now();
-    setToasts((prev) => [...prev, { id, type, message }]);
+    setToasts((prev) => [...prev, { id, type, message, title }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   }, []);
+
+  const toast = useCallback((opts: ToastOptions | string) => {
+    if (typeof opts === "string") {
+      addToast("info", opts);
+    } else {
+      const type: ToastType = opts.type || (opts.variant === "destructive" ? "error" : "success");
+      const msg = opts.message || opts.description || opts.title || "";
+      addToast(type, msg, opts.title !== msg ? opts.title : undefined);
+    }
+  }, [addToast]);
 
   const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ addToast, toast }}>
       {children}
       <div className="pointer-events-none fixed right-4 top-4 z-[100] flex w-[min(400px,calc(100vw-2rem))] flex-col gap-2">
         <AnimatePresence mode="popLayout">

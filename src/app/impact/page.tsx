@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SectionReveal from "@/components/SectionReveal";
 import CountUp from "@/components/CountUp";
+import StateImpactMap from "@/components/StateImpactMap";
 import { cn } from "@/lib/utils";
 import {
   BarChart3,
@@ -17,6 +18,11 @@ import {
   Calendar,
   Award,
   Leaf,
+  Target,
+  Trophy,
+  Globe2,
+  Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 
 const impactStats = [
@@ -81,11 +87,11 @@ const monthlyData = [
 ];
 
 const recentEvents = [
-  { name: "Juhu Beach Cleanup", date: "Aug 25", kg: "320 kg", volunteers: 86 },
-  { name: "Mulki River Cleanup", date: "Aug 24", kg: "180 kg", volunteers: 42 },
-  { name: "Fort Kochi Heritage Care", date: "Aug 23", kg: "95 kg", volunteers: 28 },
-  { name: "Marina Beach Restoration", date: "Aug 22", kg: "450 kg", volunteers: 120 },
-  { name: "Hawa Mahal Area Cleanup", date: "Aug 21", kg: "210 kg", volunteers: 55 },
+  { name: "Juhu Beach Cleanup", date: "Sep 02, 2026", kg: "320 kg", volunteers: 86 },
+  { name: "Mulki River Cleanup", date: "Aug 28, 2026", kg: "180 kg", volunteers: 42 },
+  { name: "Fort Kochi Heritage Care", date: "Aug 25, 2026", kg: "95 kg", volunteers: 28 },
+  { name: "Marina Beach Restoration", date: "Aug 22, 2026", kg: "450 kg", volunteers: 120 },
+  { name: "Hawa Mahal Area Cleanup", date: "Aug 18, 2026", kg: "210 kg", volunteers: 55 },
 ];
 
 export default function ImpactPage() {
@@ -98,264 +104,198 @@ export default function ImpactPage() {
       <Navbar />
 
       {/* Header */}
-      <section className="pt-28 pb-6 sm:pt-32">
+      <section className="pt-28 pb-8 sm:pt-36 sm:pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <span className="inline-flex items-center gap-2 rounded-full bg-sage-50 px-4 py-1 text-xs font-semibold text-sage-700">
-              <BarChart3 className="h-3.5 w-3.5" />
-              Live Impact Dashboard
-            </span>
-            <h1 className="mt-4 font-display text-3xl font-bold text-ink-900 sm:text-4xl lg:text-5xl">
-              Our Impact So Far
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <div className="inline-flex items-center gap-2 rounded-full border border-sage-200 bg-sage-50 px-4 py-1.5 text-xs font-semibold text-sage-800 mb-3">
+              <Sparkles className="h-3.5 w-3.5 text-sage-600" />
+              Verified On-Chain & Geotagged Metrics
+            </div>
+            <h1 className="font-display text-3xl font-bold text-ink-900 sm:text-4xl lg:text-5xl">
+              Impact Dashboard
             </h1>
-            <p className="mt-2 text-ink-500 sm:text-lg">
-              Real-time data from verified restoration events across India
+            <p className="mt-2 text-ink-500 sm:text-lg max-w-2xl">
+              Real-time restoration progress across India. Audited from rotating QR check-ins and verified NSS volunteer hours.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Impact stats */}
-      <section className="py-4">
+      {/* Hero Stats */}
+      <section className="pb-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {impactStats.map((stat, i) => (
-              <SectionReveal key={stat.label} delay={i * 0.1}>
-                <div className="group rounded-2xl border border-ink-100 bg-white p-4 sm:p-6 transition-all hover:shadow-md">
-                  <div className={cn("flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4", stat.color)}>
-                    <stat.icon className={cn("h-5 w-5 sm:h-6 sm:w-6", stat.iconColor)} />
-                  </div>
-                  <div className="mt-3 sm:mt-4">
-                    <CountUp
-                      target={stat.value}
-                      suffix={stat.suffix}
-                      className="font-display text-2xl sm:text-3xl font-bold text-ink-800"
-                    />
-                    <p className="mt-0.5 text-xs sm:text-sm text-ink-500">{stat.label}</p>
-                  </div>
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="rounded-3xl border border-earth-200 bg-white p-6 shadow-sm"
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${stat.color} ring-4 mb-4`}>
+                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                 </div>
-              </SectionReveal>
+                <div className="font-display text-3xl font-bold text-ink-900 sm:text-4xl">
+                  <CountUp target={stat.value} />
+                  {stat.suffix}
+                </div>
+                <p className="mt-1 text-xs sm:text-sm font-medium text-ink-500 capitalize">{stat.label}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Tabs */}
-      <section className="mt-4 py-4 sm:py-8">
+      <section className="border-b border-earth-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-1 rounded-xl border border-ink-200 bg-white p-1 w-fit">
+          <div className="flex gap-8">
             {[
               { id: "overview" as const, label: "Overview" },
-              { id: "states" as const, label: "By State" },
-              { id: "monthly" as const, label: "Monthly" },
+              { id: "states" as const, label: "Interactive State Map" },
+              { id: "monthly" as const, label: "Monthly Trends" },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "rounded-lg px-4 py-2 text-sm font-medium transition-all",
-                  activeTab === tab.id
-                    ? "bg-ink-800 text-white shadow"
-                    : "text-ink-600 hover:bg-ink-50"
+                  "relative py-4 text-sm font-bold transition-colors",
+                  activeTab === tab.id ? "text-amber-800" : "text-ink-400 hover:text-ink-700"
                 )}
               >
                 {tab.label}
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="impact-tab"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Content */}
-      <section className="pb-16">
+      {/* Tab Content */}
+      <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {activeTab === "overview" && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Chart placeholder */}
+            <div className="space-y-8">
+              {/* Interactive State Map Preview */}
               <SectionReveal>
-                <div className="rounded-2xl border border-ink-100 bg-white p-6">
-                  <h3 className="font-display text-lg font-bold text-ink-800">
-                    Monthly Waste Collected (tons)
+                <div className="mb-4">
+                  <h3 className="font-display text-xl font-bold text-ink-900">
+                    State-Wise Volunteer Footprint
                   </h3>
-                  <div className="mt-6 flex items-end gap-2 h-48">
-                    {monthlyData.map((d, i) => (
-                      <div key={d.month} className="flex flex-1 flex-col items-center gap-1">
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: `${(d.waste / 30) * 100}%` }}
-                          transition={{ delay: 0.3 + i * 0.08, duration: 0.6, ease: "easeOut" }}
-                          className="w-full rounded-t-lg bg-gradient-to-t from-sage-500 to-sage-400"
-                        />
-                        <span className="text-[10px] font-medium text-ink-500">
-                          {d.month}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-xs text-ink-500 mt-1">Hover over states to inspect active volunteers and verified waste collected</p>
                 </div>
+                <StateImpactMap />
               </SectionReveal>
 
-              {/* Recent events */}
-              <SectionReveal delay={0.1}>
-                <div className="rounded-2xl border border-ink-100 bg-white p-6">
-                  <h3 className="font-display text-lg font-bold text-ink-800">
-                    Recent Events
-                  </h3>
-                  <div className="mt-4 space-y-3">
-                    {recentEvents.map((event, i) => (
-                      <div
-                        key={event.name}
-                        className="flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-ink-50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sage-50">
-                            <Leaf className="h-4 w-4 text-sage-500" />
+              <div className="grid gap-8 lg:grid-cols-2">
+                {/* Recent events */}
+                <SectionReveal delay={0.1}>
+                  <div className="rounded-3xl border border-earth-200 bg-white p-6 shadow-sm">
+                    <h3 className="font-display text-lg font-bold text-ink-900">
+                      Recent Verified Seva Drives
+                    </h3>
+                    <div className="mt-4 space-y-3">
+                      {recentEvents.map((event) => (
+                        <div
+                          key={event.name}
+                          className="flex items-center justify-between rounded-2xl p-3 border border-earth-100 transition-colors hover:bg-earth-50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage-50 border border-sage-200">
+                              <Leaf className="h-5 w-5 text-sage-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-ink-800">{event.name}</p>
+                              <p className="text-xs text-ink-400">{event.date}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-sage-700">{event.kg}</p>
+                            <p className="text-[11px] text-ink-400">{event.volunteers} volunteers</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </SectionReveal>
+
+                {/* Milestones - No raw emojis */}
+                <SectionReveal delay={0.2}>
+                  <div className="rounded-3xl border border-earth-200 bg-white p-6 shadow-sm">
+                    <h3 className="font-display text-lg font-bold text-ink-900">
+                      National Milestones
+                    </h3>
+                    <div className="mt-4 space-y-3">
+                      {[
+                        {
+                          icon: Target,
+                          title: "2.4 Lakh kg Collected",
+                          desc: "Waste collected milestone across coastal and alpine trails (Oct 2026)",
+                          color: "bg-amber-50 text-amber-700 border-amber-200",
+                        },
+                        {
+                          icon: Trophy,
+                          title: "500+ Verified Drives",
+                          desc: "Cleanups, mangrove plantations, and baori restorations completed",
+                          color: "bg-sage-50 text-sage-700 border-sage-200",
+                        },
+                        {
+                          icon: Globe2,
+                          title: "28 States & UTs Covered",
+                          desc: "Pan-India footprint with 342 active community restoration sites",
+                          color: "bg-blue-50 text-blue-700 border-blue-200",
+                        },
+                      ].map((m) => (
+                        <div
+                          key={m.title}
+                          className="flex items-start gap-3.5 rounded-2xl bg-earth-50/70 p-4 border border-earth-200"
+                        >
+                          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${m.color}`}>
+                            <m.icon className="h-5 w-5" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-ink-700">
-                              {event.name}
-                            </p>
-                            <p className="text-xs text-ink-400">{event.date}</p>
+                            <p className="font-display text-base font-bold text-ink-900">{m.title}</p>
+                            <p className="mt-0.5 text-xs text-ink-500 leading-relaxed">{m.desc}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-sage-600">{event.kg}</p>
-                          <p className="text-[11px] text-ink-400">
-                            {event.volunteers} volunteers
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </SectionReveal>
-
-              {/* Milestones */}
-              <SectionReveal delay={0.2} className="lg:col-span-2">
-                <div className="rounded-2xl border border-ink-100 bg-white p-6">
-                  <h3 className="font-display text-lg font-bold text-ink-800">
-                    Milestones
-                  </h3>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                    {[
-                      {
-                        icon: "🎯",
-                        title: "1 Lakh kg",
-                        desc: "Waste collected milestone — hit in June 2026",
-                      },
-                      {
-                        icon: "🏆",
-                        title: "500+ Events",
-                        desc: "Verified events completed across 8 states",
-                      },
-                      {
-                        icon: "🌍",
-                        title: "28 States",
-                        desc: "Pan-India coverage with 342 active restoration sites",
-                      },
-                    ].map((m) => (
-                      <div
-                        key={m.title}
-                        className="flex items-start gap-3 rounded-xl bg-earth-50 p-4"
-                      >
-                        <span className="text-2xl">{m.icon}</span>
-                        <div>
-                          <p className="font-display text-lg font-bold text-ink-800">
-                            {m.title}
-                          </p>
-                          <p className="mt-0.5 text-sm text-ink-500">{m.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </SectionReveal>
+                </SectionReveal>
+              </div>
             </div>
           )}
 
           {activeTab === "states" && (
             <SectionReveal>
-              <div className="rounded-2xl border border-ink-100 bg-white p-6">
-                <h3 className="font-display text-lg font-bold text-ink-800">
-                  State-wise Impact
-                </h3>
-                <div className="mt-6 space-y-4">
-                  {stateData.map((state, i) => (
-                    <motion.div
-                      key={state.state}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="grid grid-cols-[120px_1fr_100px_100px_60px] items-center gap-4 rounded-xl p-3 transition-colors hover:bg-ink-50 sm:grid-cols-[140px_1fr_120px_120px_80px]"
-                    >
-                      <span className="font-semibold text-ink-800">
-                        {state.state}
-                      </span>
-                      <div className="h-3 overflow-hidden rounded-full bg-ink-100">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${(parseInt(state.waste.replace(/,/g, "")) / maxWaste) * 100}%`,
-                          }}
-                          transition={{ delay: 0.3 + i * 0.05, duration: 0.6 }}
-                          className="h-full rounded-full bg-gradient-to-r from-sage-400 to-sage-500"
-                        />
-                      </div>
-                      <span className="text-sm text-ink-600">{state.waste}</span>
-                      <span className="text-sm text-ink-600">
-                        {state.volunteers.toLocaleString("en-IN")} vol.
-                      </span>
-                      <span className="text-sm font-semibold text-sage-600">
-                        {state.trend}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              <StateImpactMap />
             </SectionReveal>
           )}
 
           {activeTab === "monthly" && (
             <SectionReveal>
-              <div className="rounded-2xl border border-ink-100 bg-white p-6">
-                <h3 className="font-display text-lg font-bold text-ink-800">
-                  Monthly Breakdown
+              <div className="rounded-3xl border border-earth-200 bg-white p-6 shadow-sm">
+                <h3 className="font-display text-lg font-bold text-ink-900">
+                  Monthly Waste Collected (in 1,000 kg)
                 </h3>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {monthlyData.map((d, i) => (
-                    <motion.div
-                      key={d.month}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="rounded-xl border border-ink-100 p-4 transition-all hover:shadow-md"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-display text-lg font-bold text-ink-800">
-                          {d.month}
-                        </span>
-                        <Calendar className="h-4 w-4 text-ink-400" />
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-ink-500">Waste</span>
-                          <span className="font-semibold text-sage-600">{d.waste} tons</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-ink-500">Events</span>
-                          <span className="font-semibold text-ink-700">{d.events}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-ink-500">Volunteers</span>
-                          <span className="font-semibold text-terra-600">
-                            {d.volunteers.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
+                <p className="text-xs text-ink-500 mt-1 mb-6">Aggregate collection growth tracked across certified event leads</p>
+                <div className="grid grid-cols-8 gap-2 items-end h-64 border-b border-earth-200 pb-2">
+                  {monthlyData.map((m) => (
+                    <div key={m.month} className="flex flex-col items-center gap-2 h-full justify-end">
+                      <span className="text-[10px] font-bold text-ink-700">{m.waste}k</span>
+                      <div
+                        style={{ height: `${(m.waste / 30) * 100}%` }}
+                        className="w-full max-w-[36px] bg-gradient-to-t from-amber-500 to-terra-500 rounded-t-xl"
+                      />
+                      <span className="text-xs font-semibold text-ink-500">{m.month}</span>
+                    </div>
                   ))}
                 </div>
               </div>

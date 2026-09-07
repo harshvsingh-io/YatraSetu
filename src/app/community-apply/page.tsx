@@ -112,7 +112,7 @@ export default function CommunityApplyPage() {
                     {[
                       { title: "Create Events", desc: "Set up verified cleanup and plantation drives" },
                       { title: "Manage Volunteers", desc: "Review RSVPs, scan QR check-ins, track attendance" },
-                      { title: "Verified Badge", desc: "Your events show a trusted Verified ✅ badge" },
+                      { title: "Official Verified Badge", desc: "Your drives receive an auditable Verified Lead badge" },
                       { title: "Impact Dashboard", desc: "Track your site's restoration metrics in real-time" },
                     ].map((b) => (
                       <div

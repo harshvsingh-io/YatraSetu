@@ -4,10 +4,21 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Button from "@/components/Button";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/components/Toast";
 import { cn } from "@/lib/utils";
-import { Mountain, Phone, ArrowRight, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  Mountain,
+  Phone,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+  ShieldCheck,
+  UserCheck,
+  Compass,
+} from "lucide-react";
 
 type PhoneStep = "enter" | "otp";
 
@@ -38,15 +49,29 @@ function OTPInput({ length = 6, value, onChange }: { length?: number; value: str
   };
 
   return (
-    <div className="flex gap-2 sm:gap-3" onPaste={handlePaste}>
+    <div className="flex gap-2 sm:gap-3 justify-center" onPaste={handlePaste}>
       {Array.from({ length }).map((_, i) => (
-        <input key={i} ref={(el) => { inputs.current[i] = el; }} type="text" inputMode="numeric" maxLength={1}
+        <input
+          key={i}
+          ref={(el) => { inputs.current[i] = el; }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
           value={value[i] || ""}
-          onChange={(e) => { const val = e.target.value.replace(/\D/g, ""); const nv = value.split(""); nv[i] = val; onChange(nv.join("").slice(0, length)); if (val && i < length - 1) focusInput(i + 1); }}
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, "");
+            const nv = value.split("");
+            nv[i] = val;
+            onChange(nv.join("").slice(0, length));
+            if (val && i < length - 1) focusInput(i + 1);
+          }}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onFocus={(e) => e.target.select()}
           autoFocus={i === 0}
-          className={cn("h-14 w-11 sm:h-16 sm:w-13 rounded-xl border-2 bg-white text-center font-display text-xl font-bold text-ink-800 transition-all duration-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-100 focus:outline-none", value[i] ? "border-earth-300" : "border-earth-200")}
+          className={cn(
+            "h-13 w-10 sm:h-14 sm:w-12 rounded-xl border-2 bg-white text-center font-display text-xl font-bold text-ink-900 transition-all focus:border-amber-500 focus:ring-4 focus:ring-amber-100 focus:outline-none shadow-sm",
+            value[i] ? "border-amber-500 bg-amber-50/20" : "border-earth-300"
+          )}
         />
       ))}
     </div>
@@ -55,8 +80,11 @@ function OTPInput({ length = 6, value, onChange }: { length?: number; value: str
 
 export default function LoginPage() {
   const router = useRouter();
+  const { signInWithPhone, signInWithGoogle, signInDemo } = useAuth();
+  const { toast } = useToast();
+
   const [phoneStep, setPhoneStep] = useState<PhoneStep>("enter");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("9876543210");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -64,177 +92,293 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (resendTimer <= 0) return;
-    const interval = setInterval(() => setResendTimer((prev) => { if (prev <= 1) { clearInterval(interval); return 0; } return prev - 1; }), 1000);
+    const interval = setInterval(() => {
+      setResendTimer((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Google OAuth — real Supabase flow
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
+    const res = await signInWithGoogle();
+    setLoading(false);
+    if (res.success) {
+      toast({ title: "Welcome back!", message: "Successfully signed in via Google." });
+      router.push("/profile");
+    } else {
+      setError(res.error || "Failed to sign in with Google.");
     }
   };
 
-  // Phone OTP — send code
   const handleSendOTP = async () => {
-    if (phone.length < 10) return;
+    if (phone.replace(/\D/g, "").length < 10) {
+      setError("Please enter a valid 10-digit Indian phone number.");
+      return;
+    }
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: `+91${phone}`,
-    });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
+    // Simulate sending OTP or call backend
+    setTimeout(() => {
       setLoading(false);
       setPhoneStep("otp");
+      setOtp("123456"); // Pre-fill mock OTP for effortless judge demo
       setResendTimer(30);
+      toast({ title: "OTP Sent!", message: "Demo OTP 123456 sent to +91 " + phone });
+    }, 400);
+  };
+
+  const handleVerifyOTP = async () => {
+    if (otp.length < 6) {
+      setError("Please enter the 6-digit OTP.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    const res = await signInWithPhone(phone, otp, "student-nss");
+    setLoading(false);
+    if (res.success) {
+      toast({ title: "Signed In Successfully!", message: "Welcome to YatraSetu." });
+      router.push("/profile");
+    } else {
+      setError(res.error || "Invalid OTP code.");
     }
   };
 
-  // Phone OTP — verify code
-  const handleVerifyOTP = async () => {
-    if (otp.length < 6) return;
-    setLoading(true);
-    setError("");
-    const { error } = await supabase.auth.verifyOtp({
-      phone: `+91${phone}`,
-      token: otp,
-      type: "sms",
+  const handleQuickDemo = (role: "volunteer" | "traveler") => {
+    signInDemo(role);
+    toast({
+      title: "Demo Mode Active",
+      message: `Signed in as ${role === "volunteer" ? "Arjun (NSS Volunteer)" : "Rohan (Traveler)"}.`,
     });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      setLoading(false);
-      router.push("/profile");
-    }
+    router.push("/profile");
   };
 
   return (
-    <div className="relative flex min-h-screen">
-      {/* Left decorative panel */}
+    <div className="relative flex min-h-screen bg-earth-50">
+      {/* Left decorative branding panel */}
       <div className="relative hidden w-1/2 overflow-hidden bg-ink-900 lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div className="absolute inset-0">
           <div className="absolute -right-20 -top-20 h-[500px] w-[500px] rounded-full bg-amber-500/10 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-sage-500/8 blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, #FAF8F5 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-sage-500/10 blur-3xl" />
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{ backgroundImage: "radial-gradient(circle, #FAF8F5 1px, transparent 1px)", backgroundSize: "32px 32px" }}
+          />
         </div>
+
         <div className="relative z-10">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-terra-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-terra-500 shadow-glow-amber">
               <Mountain className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-display text-xl text-white">YatraSetu</span>
+            <div className="flex flex-col">
+              <span className="font-display text-xl font-bold text-white">YatraSetu</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-amber-400">यात्रा बने सेवा</span>
+            </div>
           </Link>
         </div>
+
         <div className="relative z-10 max-w-md">
-          <h2 className="font-display text-4xl font-bold leading-tight text-white">
-            Your journey starts with <span className="text-amber-400">purpose.</span>
-          </h2>
-          <p className="mt-6 text-ink-400 leading-relaxed">
-            Join 18,000+ travelers and volunteers who are making every trip count.
-          </p>
-          <div className="mt-10 flex gap-8">
-            {[{ val: "340+", label: "Sites" }, { val: "28", label: "States" }, { val: "2.4L", label: "kg collected" }].map((s) => (
-              <div key={s.label}>
-                <p className="font-display text-2xl font-bold text-white">{s.val}</p>
-                <p className="text-xs text-ink-500">{s.label}</p>
-              </div>
-            ))}
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold text-amber-300 mb-6">
+            <Sparkles className="h-3.5 w-3.5" />
+            Smart India Hackathon 2026 · PS SIH26202
           </div>
+          <h2 className="font-display text-4xl font-bold leading-tight text-white">
+            Travel without crowds. <br />
+            Restore with <span className="text-amber-400">purpose.</span>
+          </h2>
+          <p className="mt-5 text-ink-400 leading-relaxed text-sm">
+            Join 18,000+ travelers, students, and community leads who are routing away from tourist congestion and reviving India's natural ecosystems.
+          </p>
+
+          <div className="mt-10 grid grid-cols-3 gap-4 border-t border-ink-800 pt-8">
+            <div>
+              <p className="font-display text-2xl font-bold text-white">340+</p>
+              <p className="text-xs text-ink-500">Restoration Sites</p>
+            </div>
+            <div>
+              <p className="font-display text-2xl font-bold text-white">28</p>
+              <p className="text-xs text-ink-500">States Covered</p>
+            </div>
+            <div>
+              <p className="font-display text-2xl font-bold text-white">2.4L kg</p>
+              <p className="text-xs text-ink-500">Waste Restored</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 text-xs text-ink-600">
+          © 2026 YatraSetu. Verified Seva Architecture.
         </div>
       </div>
 
-      {/* Right form */}
+      {/* Right Form Panel */}
       <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-20">
         <div className="mx-auto w-full max-w-md">
+          {/* Mobile Logo */}
           <div className="mb-8 lg:hidden">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-terra-500">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-terra-500 shadow-glow-amber">
                 <Mountain className="h-5 w-5 text-white" strokeWidth={2.5} />
               </div>
-              <span className="font-display text-xl text-ink-900">YatraSetu</span>
+              <span className="font-display text-xl font-bold text-ink-900">YatraSetu</span>
             </Link>
           </div>
 
-          <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-ink-900">Welcome back</h1>
-            <p className="mt-2 text-ink-500">Sign in to continue your journey</p>
+          {/* Quick Demo Judge Login Bar */}
+          <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">
+              <Sparkles className="h-4 w-4 text-amber-600" />
+              <span>Judge / Demo 1-Click Access</span>
+            </div>
+            <p className="text-xs text-amber-800/80 mb-3">
+              Instant login for testing all features without waiting for an SMS:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickDemo("volunteer")}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-3 py-2 text-xs font-bold text-white hover:bg-amber-700 active:scale-95 transition-all shadow-sm"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                NSS Volunteer
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDemo("traveler")}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-ink-900 px-3 py-2 text-xs font-bold text-white hover:bg-ink-800 active:scale-95 transition-all shadow-sm"
+              >
+                <Compass className="h-3.5 w-3.5" />
+                Traveler Profile
+              </button>
+            </div>
           </div>
 
-          {/* Error message */}
+          <div className="mb-6">
+            <h1 className="font-display text-3xl font-bold text-ink-900">
+              {phoneStep === "enter" ? "Sign In / Register" : "Verify Phone"}
+            </h1>
+            <p className="mt-1.5 text-sm text-ink-500">
+              {phoneStep === "enter"
+                ? "Enter your phone or Google account to continue"
+                : `Enter the 6-digit code sent to +91 ${phone}`}
+            </p>
+          </div>
+
+          {/* Error Banner */}
           <AnimatePresence>
             {error && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                className="mb-4 rounded-xl border border-terra-200 bg-terra-50 p-3 text-sm text-terra-700">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700"
+              >
                 {error}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Google OAuth */}
-          <button onClick={handleGoogleSignIn} disabled={loading}
-            className="group flex h-13 w-full items-center justify-center gap-3 rounded-xl border-2 border-earth-300 bg-white font-semibold text-ink-700 transition-all duration-200 hover:border-earth-400 hover:bg-earth-50 hover:shadow-md active:scale-[0.98] disabled:opacity-50">
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon className="h-5 w-5" />}
-            Continue with Google
-          </button>
+          {phoneStep === "enter" ? (
+            <div className="space-y-4">
+              {/* Google OAuth button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-3 rounded-2xl border border-earth-300 bg-white py-3 px-4 text-sm font-bold text-ink-800 shadow-sm transition-all hover:bg-earth-100 hover:border-earth-400 active:scale-[0.99]"
+              >
+                <GoogleIcon className="h-5 w-5" />
+                <span>Continue with Google</span>
+              </button>
 
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-earth-200" /></div>
-            <div className="relative flex justify-center text-sm"><span className="bg-earth-50 px-4 text-ink-400">or</span></div>
-          </div>
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-earth-200"></div>
+                </div>
+                <span className="relative bg-earth-50 px-4 text-xs font-semibold uppercase tracking-wider text-ink-400">
+                  Or phone OTP
+                </span>
+              </div>
 
-          {/* Phone OTP */}
-          <AnimatePresence mode="wait">
-            {phoneStep === "enter" ? (
-              <motion.div key="enter" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
-                <div className="flex gap-2">
-                  <div className="flex h-13 w-20 items-center justify-center rounded-xl border-2 border-earth-200 bg-earth-100 text-sm font-semibold text-ink-700">+91 🇮🇳</div>
-                  <input type="tel" inputMode="numeric" placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} maxLength={10}
-                    className="flex-1 rounded-xl border-2 border-earth-200 bg-white px-4 text-lg font-medium text-ink-800 placeholder:text-ink-300 transition-all focus:border-amber-400 focus:ring-4 focus:ring-amber-100 focus:outline-none" />
+              {/* Phone Input */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-ink-600 mb-2">
+                  Mobile Number
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-3.5 flex items-center gap-1 text-sm font-bold text-ink-600 border-r border-earth-300 pr-2.5">
+                    <span>🇮🇳</span>
+                    <span>+91</span>
+                  </div>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                    placeholder="98765 43210"
+                    className="w-full rounded-2xl border border-earth-300 bg-white py-3.5 pl-24 pr-4 text-sm font-semibold text-ink-900 placeholder:text-ink-300 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 shadow-sm"
+                  />
                 </div>
-                <Button onClick={handleSendOTP} loading={loading} disabled={phone.length < 10} variant="secondary" className="w-full" size="lg">
-                  Send OTP <ArrowRight className="h-4 w-4" />
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.div key="otp" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-                <button onClick={() => { setPhoneStep("enter"); setOtp(""); setError(""); }} className="flex items-center gap-2 text-sm font-medium text-ink-600 hover:text-ink-800 transition-colors">
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </button>
-                <div>
-                  <p className="text-sm text-ink-500">Enter the 6-digit code sent to</p>
-                  <p className="font-semibold text-ink-800">+91 {phone}</p>
-                </div>
-                <OTPInput value={otp} onChange={setOtp} />
-                <Button onClick={handleVerifyOTP} loading={loading} disabled={otp.length < 6} variant="secondary" className="w-full" size="lg">
-                  Verify & Sign In <CheckCircle2 className="h-4 w-4" />
-                </Button>
-                <div className="text-center">
-                  {resendTimer > 0 ? (
-                    <p className="text-sm text-ink-400">Resend OTP in <span className="font-semibold text-ink-600">{resendTimer}s</span></p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSendOTP}
+                disabled={loading || phone.length < 10}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-terra-500 py-3.5 text-sm font-bold text-white shadow-lg shadow-amber-500/20 transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <span>Send Verification OTP</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div>
+                <OTPInput length={6} value={otp} onChange={setOtp} />
+                <p className="mt-3 text-center text-xs text-ink-500">
+                  Demo code auto-filled: <span className="font-bold text-amber-700">123456</span>
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleVerifyOTP}
+                  disabled={loading || otp.length < 6}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink-900 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-ink-800 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <button onClick={handleSendOTP} className="text-sm font-semibold text-amber-600 hover:text-amber-700 transition-colors">Resend OTP</button>
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-sage-400" />
+                      <span>Verify & Enter YatraSetu</span>
+                    </>
                   )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </button>
 
-          <p className="mt-10 text-center text-xs text-ink-400">
-            By continuing, you agree to our <a href="#" className="underline hover:text-ink-600">Terms</a> and <a href="#" className="underline hover:text-ink-600">Privacy Policy</a>
+                <button
+                  type="button"
+                  onClick={() => setPhoneStep("enter")}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold text-ink-600 hover:text-ink-900"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Change Phone Number
+                </button>
+              </div>
+            </div>
+          )}
+
+          <p className="mt-8 text-center text-xs text-ink-400">
+            By signing in, you agree to our Terms of Service and Privacy Policy. Built for India.
           </p>
         </div>
       </div>

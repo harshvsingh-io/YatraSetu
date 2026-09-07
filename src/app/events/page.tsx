@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
+import QRCheckInModal from "@/components/QRCheckInModal";
 import {
   Calendar,
   MapPin,
@@ -22,6 +23,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   X,
+  QrCode,
+  Sparkles,
 } from "lucide-react";
 
 const eventTypes = [
@@ -120,6 +123,7 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
   const [rsvpd, setRsvpd] = useState<Set<number>>(new Set());
   const [showRSVPModal, setShowRSVPModal] = useState(false);
+  const [checkInModalEvent, setCheckInModalEvent] = useState<typeof events[0] | null>(null);
   const [waiverChecked, setWaiverChecked] = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
 
@@ -140,7 +144,9 @@ export default function EventsPage() {
       setRsvpLoading(false);
       setShowRSVPModal(false);
       setWaiverChecked(false);
-    }, 1500);
+      // Offer immediate check-in simulation
+      setCheckInModalEvent(selectedEvent);
+    }, 1000);
   };
 
   return (
@@ -288,24 +294,35 @@ export default function EventsPage() {
                           </span>
                         </div>
 
-                        {rsvpd.has(event.id) ? (
-                          <span className="flex items-center gap-1.5 rounded-xl bg-sage-50 px-4 py-2 text-sm font-semibold text-sage-700">
-                            <CheckCircle2 className="h-4 w-4" />
-                            RSVPed
-                          </span>
-                        ) : (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedEvent(event);
-                              setShowRSVPModal(true);
-                            }}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setCheckInModalEvent(event)}
+                            className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors shadow-sm"
+                            title="Simulate Fraud-Proof QR Check-in"
                           >
-                            RSVP
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        )}
+                            <QrCode className="h-3.5 w-3.5 text-amber-600" />
+                            <span>Check-In Demo</span>
+                          </button>
+
+                          {rsvpd.has(event.id) ? (
+                            <span className="flex items-center gap-1.5 rounded-xl bg-sage-50 px-3.5 py-1.5 text-xs font-bold text-sage-700 border border-sage-200">
+                              <CheckCircle2 className="h-4 w-4" />
+                              RSVPed
+                            </span>
+                          ) : (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedEvent(event);
+                                setShowRSVPModal(true);
+                              }}
+                            >
+                              RSVP
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -428,6 +445,14 @@ export default function EventsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {checkInModalEvent && (
+        <QRCheckInModal
+          isOpen={!!checkInModalEvent}
+          onClose={() => setCheckInModalEvent(null)}
+          event={checkInModalEvent}
+        />
+      )}
 
       <Footer />
     </main>

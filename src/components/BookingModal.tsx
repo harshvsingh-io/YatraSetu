@@ -14,6 +14,9 @@ import {
   Copy,
 } from "lucide-react";
 import Button from "@/components/Button";
+import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/components/Toast";
+import Link from "next/link";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -34,6 +37,9 @@ export default function BookingModal({
   onClose,
   hotel,
 }: BookingModalProps) {
+  const { addBooking } = useAuth();
+  const { toast } = useToast();
+
   const [step, setStep] = useState<Step>("dates");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -44,11 +50,27 @@ export default function BookingModal({
   const handlePayment = () => {
     setProcessing(true);
     setTimeout(() => {
-      const id = `YS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-      setBookingId(id);
+      const pricePerNight = parseInt(hotel.priceRange.replace(/[^0-9]/g, "")) || 2800;
+      const totalAmount = pricePerNight * nights + 199;
+      const newRec = addBooking({
+        destination: hotel.location,
+        hotelName: hotel.name,
+        checkIn: checkIn || "2026-10-15",
+        checkOut: checkOut || "2026-10-18",
+        guests,
+        amount: totalAmount,
+        restorationEventLinked: `Local Heritage & Seva Drive (${hotel.location.split(",")[0]})`,
+        bonusKarma: 250,
+      });
+
+      setBookingId(newRec.id);
       setProcessing(false);
       setStep("confirmation");
-    }, 2000);
+      toast({
+        title: "Booking Confirmed!",
+        message: `${hotel.name} confirmed. +250 Green Karma added to your profile!`,
+      });
+    }, 1200);
   };
 
   const resetAndClose = () => {
@@ -382,13 +404,22 @@ export default function BookingModal({
                         <Copy className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <Button
-                      variant="secondary"
-                      className="mt-6"
-                      onClick={resetAndClose}
-                    >
-                      Done
-                    </Button>
+                    <div className="mt-6 flex gap-3">
+                      <Link
+                        href="/profile#bookings"
+                        onClick={resetAndClose}
+                        className="flex-1 rounded-xl bg-ink-900 py-3 text-xs font-bold text-white hover:bg-ink-800 transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        View in My Bookings
+                      </Link>
+                      <Button
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={resetAndClose}
+                      >
+                        Done
+                      </Button>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

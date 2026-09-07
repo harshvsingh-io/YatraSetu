@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import CrowdBadge from "@/components/CrowdBadge";
 import SectionReveal from "@/components/SectionReveal";
-import { MapPin, ArrowRight, Compass } from "lucide-react";
+import { MapPin, ArrowRight, Compass, Mountain, Trees, Landmark } from "lucide-react";
 import type { DestinationMetric } from "@/lib/seed-data";
 import { getCrowdLevel } from "@/lib/seed-data";
 
@@ -23,12 +23,19 @@ export default function UnderratedPicks() {
 
   if (picks.length === 0) return null;
 
-  const categoryEmoji: Record<string, string> = {
-    hill_station: "🏔️",
-    beach: "🏖️",
-    heritage: "🏛️",
-    spiritual: "🕉️",
-    nature: "🌿",
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "hill_station":
+        return <Mountain className="h-6 w-6 text-sage-600" />;
+      case "beach":
+        return <Compass className="h-6 w-6 text-blue-600" />;
+      case "heritage":
+        return <Landmark className="h-6 w-6 text-amber-700" />;
+      case "spiritual":
+        return <Landmark className="h-6 w-6 text-terra-600" />;
+      default:
+        return <Trees className="h-6 w-6 text-sage-600" />;
+    }
   };
 
   return (
@@ -37,7 +44,7 @@ export default function UnderratedPicks() {
         <SectionReveal>
           <div className="flex items-center justify-between">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-sage-50 px-4 py-1 text-xs font-semibold text-sage-700">
+              <span className="inline-flex items-center gap-2 rounded-full bg-sage-50 px-4 py-1 text-xs font-semibold text-sage-700 border border-sage-200">
                 <Compass className="h-3.5 w-3.5" />
                 Beat the Crowd
               </span>
@@ -57,17 +64,17 @@ export default function UnderratedPicks() {
             <SectionReveal key={pick.id} delay={i * 0.06}>
               <Link
                 href={`/discover?q=${encodeURIComponent(pick.name)}`}
-                className="group block overflow-hidden rounded-2xl border border-ink-100 bg-white transition-all hover:shadow-lg"
+                className="group block overflow-hidden rounded-2xl border border-earth-200 bg-white transition-all hover:shadow-lg hover:-translate-y-1"
               >
-                <div className="relative h-40 bg-gradient-to-br from-sage-100 to-earth-100">
-                  <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-30">
-                    {categoryEmoji[pick.category] || "📍"}
+                <div className="relative h-40 bg-gradient-to-br from-sage-50 via-earth-100 to-amber-50 flex items-center justify-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 shadow-sm border border-earth-200">
+                    {getCategoryIcon(pick.category)}
                   </div>
                   <div className="absolute left-3 top-3">
                     <CrowdBadge crowdScore={pick.crowd_score} />
                   </div>
-                  <div className="absolute bottom-3 right-3 rounded-lg bg-white/90 px-2 py-1 text-[10px] font-semibold text-ink-600 backdrop-blur-sm">
-                    {categoryEmoji[pick.category]} {pick.category.replace("_", " ")}
+                  <div className="absolute bottom-3 right-3 rounded-lg bg-white/90 px-2.5 py-1 text-[10px] font-bold text-ink-700 backdrop-blur-sm border border-earth-200 uppercase tracking-wider">
+                    {pick.category.replace("_", " ")}
                   </div>
                 </div>
                 <div className="p-4">

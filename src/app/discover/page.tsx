@@ -13,9 +13,11 @@ import SmartAlternatives from "@/components/SmartAlternatives";
 import CrowdBadge from "@/components/CrowdBadge";
 import CrowdNudgeModal from "@/components/CrowdNudgeModal";
 import { CardSkeleton } from "@/components/Skeleton";
+import { useLiveWeather } from "@/lib/useLiveWeather";
+import AIItineraryModal from "@/components/AIItineraryModal";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { Landmark, Compass } from "lucide-react";
+import { Landmark, Compass, Car, Sparkles, ShieldCheck } from "lucide-react";
 import {
   MapPin,
   Star,
@@ -140,8 +142,11 @@ export default function DiscoverPage() {
   const [bookingHotel, setBookingHotel] = useState<typeof sampleHotels[0] | null>(null);
   const [crowdData, setCrowdData] = useState<{ destination: any; alternatives: any[] } | null>(null);
   const [showNudge, setShowNudge] = useState(false);
+  const [showItineraryModal, setShowItineraryModal] = useState(false);
   const [heritageSites, setHeritageSites] = useState<any[]>([]);
   const [localPartners, setLocalPartners] = useState<any[]>([]);
+
+  const { weather: liveWeather } = useLiveWeather(selectedDestination);
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev) => {
@@ -263,57 +268,87 @@ export default function DiscoverPage() {
         </div>
       </section>
 
+      {/* AI Itinerary + Offbeat Nudge Strip */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-2 mb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="h-5 w-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-amber-900">
+                AI Seva & Decongested Itinerary Planner
+              </p>
+              <p className="text-[11px] text-amber-800">
+                Generate a custom 2–5 day route blending uncrowded attractions with verified restoration events in {selectedDestination}.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowItineraryModal(true)}
+            className="shrink-0 rounded-xl bg-ink-900 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-ink-800 active:scale-95 transition-all"
+          >
+            Plan with AI
+          </button>
+        </div>
+      </div>
+
       {/* Weather + Transport strip */}
-      <section className="border-y border-ink-100 bg-white">
+      <section className="border-y border-earth-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid py-6 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Current weather */}
-            <div className="flex items-center gap-4 rounded-xl bg-earth-50 p-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-50 text-3xl">
-                ⛅
+            {/* Current live weather */}
+            <div className="flex items-center gap-4 rounded-2xl bg-earth-50 p-4 border border-earth-200">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                <CloudSun className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-display text-2xl font-bold text-ink-800">
-                  {weatherData.temp}
-                </p>
-                <p className="text-sm text-ink-500">
-                  {weatherData.condition} · {weatherData.humidity} humidity
+                <div className="flex items-center gap-2">
+                  <p className="font-display text-2xl font-bold text-ink-900">
+                    {liveWeather.current.temp}°C
+                  </p>
+                  <span className="rounded-full bg-sage-100 px-2 py-0.2 text-[9px] font-bold text-sage-800 uppercase">
+                    Live API
+                  </span>
+                </div>
+                <p className="text-xs text-ink-500 capitalize mt-0.5">
+                  {liveWeather.current.description || liveWeather.current.condition} · {liveWeather.current.humidity}% humidity
                 </p>
               </div>
             </div>
 
             {/* 3-day forecast */}
-            <div className="flex items-center justify-around rounded-xl bg-earth-50 p-4 sm:col-span-1 lg:col-span-1">
-              {weatherData.forecast.map((day) => (
-                <div key={day.day} className="text-center">
-                  <p className="text-xs font-medium text-ink-500">{day.day}</p>
-                  <p className="my-1 text-2xl">{day.icon}</p>
-                  <p className="text-sm font-semibold text-ink-700">{day.temp}</p>
+            <div className="flex items-center justify-around rounded-2xl bg-earth-50 p-4 border border-earth-200 sm:col-span-1 lg:col-span-1">
+              {liveWeather.forecast.map((day) => (
+                <div key={day.date} className="text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-ink-400">{day.date}</p>
+                  <p className="my-0.5 text-sm font-bold text-ink-800">{day.temp}°C</p>
+                  <p className="text-[10px] text-ink-500 font-medium">{day.condition}</p>
                 </div>
               ))}
             </div>
 
             {/* Transport options */}
-            <div className="flex items-center gap-3 rounded-xl bg-earth-50 p-4 sm:col-span-2 lg:col-span-2">
-              {transportOptions.map((t, i) => (
-                <button
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-2xl bg-earth-50 p-3 border border-earth-200 sm:col-span-2 lg:col-span-2">
+              {[
+                { type: "Train", icon: Train, label: "IRCTC Trains", time: "Express", price: "₹450+", href: "https://www.irctc.co.in" },
+                { type: "Bus", icon: Bus, label: "RedBus", time: "AC Sleeper", price: "₹750+", href: "https://www.redbus.in" },
+                { type: "Flight", icon: Plane, label: "Skyscanner", time: "Direct Air", price: "₹3,400+", href: "https://www.skyscanner.co.in" },
+                { type: "Cab", icon: Car, label: "Ola Outstation", time: "Doorstep", price: "₹2,800+", href: "https://www.olacabs.com" },
+              ].map((t) => (
+                <a
                   key={t.type}
-                  className={cn(
-                    "flex flex-1 flex-col items-center gap-1 rounded-xl border border-ink-100 bg-white p-3 transition-all hover:border-terra-200 hover:shadow-sm",
-                    i > 0 && "ml-2"
-                  )}
+                  href={t.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-earth-200 bg-white p-2.5 text-center transition-all hover:border-amber-400 hover:shadow-sm group"
                 >
-                  <t.icon className="h-5 w-5 text-ink-500" />
-                  <span className="text-[11px] font-medium text-ink-600">
+                  <t.icon className="h-4 w-4 text-ink-600 group-hover:text-amber-600 transition-colors" />
+                  <span className="text-[10px] font-bold text-ink-800 leading-tight">
                     {t.label}
                   </span>
-                  <span className="text-xs font-bold text-ink-800">
-                    {t.time}
-                  </span>
-                  <span className="text-[11px] text-terra-500 font-semibold">
+                  <span className="text-[10px] text-amber-700 font-bold">
                     {t.price}
                   </span>
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -545,8 +580,8 @@ export default function DiscoverPage() {
                   <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
                   <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-white/5" />
                   <div className="relative z-10">
-                    <span className="rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold">
-                      🌿 Nearby Event
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold">
+                      <Sparkles className="h-3.5 w-3.5" /> Nearby Restoration Event
                     </span>
                     <h3 className="mt-3 font-display text-lg font-bold">
                       Goa Beach Cleanup
@@ -626,8 +661,8 @@ export default function DiscoverPage() {
                                 {partner.type} · {partner.price_range}
                               </p>
                             </div>
-                            <span className="rounded-md bg-sage-50 px-2 py-0.5 text-[10px] font-semibold text-sage-600">
-                              Verified ✓
+                            <span className="inline-flex items-center gap-1 rounded-md bg-sage-50 px-2 py-0.5 text-[10px] font-semibold text-sage-700">
+                              <ShieldCheck className="h-3 w-3" /> Verified Stay
                             </span>
                           </div>
                           <p className="mt-1.5 text-xs text-ink-500">
@@ -663,6 +698,14 @@ export default function DiscoverPage() {
         destinationName={selectedDestination}
         alternatives={crowdData?.alternatives || []}
       />
+
+      {showItineraryModal && (
+        <AIItineraryModal
+          isOpen={showItineraryModal}
+          onClose={() => setShowItineraryModal(false)}
+          destination={selectedDestination}
+        />
+      )}
     </main>
   );
 }

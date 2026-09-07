@@ -21,6 +21,8 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  Waves,
+  TreePine,
 } from "lucide-react";
 
 const userStamps = 12;
@@ -32,7 +34,8 @@ const earnedRewards = [
     title: "Beach Cleanup Champion",
     description: "Completed 5 beach cleanup events",
     date: "Oct 15, 2026",
-    icon: "🏖️",
+    icon: Waves,
+    color: "bg-blue-50 text-blue-600 border-blue-200",
     type: "stamp",
   },
   {
@@ -40,7 +43,8 @@ const earnedRewards = [
     title: "Plantation Pioneer",
     description: "Planted 50+ trees across events",
     date: "Nov 1, 2026",
-    icon: "🌳",
+    icon: TreePine,
+    color: "bg-sage-50 text-sage-600 border-sage-200",
     type: "stamp",
   },
   {
@@ -48,15 +52,17 @@ const earnedRewards = [
     title: "Heritage Guardian",
     description: "Participated in 3 heritage care events",
     date: "Dec 6, 2026",
-    icon: "🏛️",
+    icon: Landmark,
+    color: "bg-amber-50 text-amber-700 border-amber-200",
     type: "stamp",
   },
   {
     id: 4,
     title: "₹500 Hotel Voucher",
     description: "Redeemable at partner hotels in Goa",
-    date: "Earned Aug 20",
-    icon: "🏨",
+    date: "Earned Oct 2026",
+    icon: Hotel,
+    color: "bg-terra-50 text-terra-600 border-terra-200",
     type: "coupon",
     expires: "Mar 31, 2027",
   },
@@ -64,8 +70,9 @@ const earnedRewards = [
     id: 5,
     title: "Free Cab Ride",
     description: "₹200 Ola credit for event transport",
-    date: "Earned Aug 15",
-    icon: "🚕",
+    date: "Earned Oct 2026",
+    icon: Car,
+    color: "bg-ink-50 text-ink-700 border-ink-200",
     type: "coupon",
     expires: "Feb 28, 2027",
   },
@@ -221,7 +228,9 @@ export default function RewardsPage() {
                 <SectionReveal key={reward.id} delay={i * 0.06}>
                   <div className="group rounded-2xl border border-ink-100 bg-white p-5 transition-all hover:shadow-md">
                     <div className="flex items-start gap-4">
-                      <span className="text-3xl">{reward.icon}</span>
+                      <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border", reward.color)}>
+                        <reward.icon className="h-6 w-6" />
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h3 className="font-display text-base font-bold text-ink-800">

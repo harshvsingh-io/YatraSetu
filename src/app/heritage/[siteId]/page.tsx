@@ -14,6 +14,11 @@ import {
   MapPin,
   Landmark,
   ArrowLeft,
+  Shield,
+  Crown,
+  Mountain,
+  Trees,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -84,12 +89,19 @@ export default function HeritageStoryPage() {
     };
   }, []);
 
-  const categoryIcons: Record<string, string> = {
-    fort: "🏰",
-    temple: "🕉️",
-    palace: "👑",
-    monument: "🗿",
-    natural: "🌿",
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "fort":
+        return <Shield className="h-5 w-5 text-amber-700" />;
+      case "temple":
+        return <Landmark className="h-5 w-5 text-terra-600" />;
+      case "palace":
+        return <Crown className="h-5 w-5 text-amber-600" />;
+      case "natural":
+        return <Trees className="h-5 w-5 text-sage-600" />;
+      default:
+        return <Landmark className="h-5 w-5 text-ink-600" />;
+    }
   };
 
   return (
@@ -119,11 +131,11 @@ export default function HeritageStoryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-6"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-3xl">
-                    {categoryIcons[site.category] || "📍"}
-                  </span>
-                  <span className="rounded-full bg-amber-50 px-3 py-0.5 text-xs font-semibold text-amber-700 capitalize">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 shadow-2xs">
+                    {getCategoryIcon(site.category)}
+                  </div>
+                  <span className="rounded-full bg-amber-50 px-3 py-0.5 text-xs font-semibold text-amber-700 capitalize border border-amber-200/80">
                     {site.category}
                   </span>
                 </div>
