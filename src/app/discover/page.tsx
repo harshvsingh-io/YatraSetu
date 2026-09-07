@@ -8,10 +8,15 @@ import TiltCard from "@/components/TiltCard";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
 import BookingModal from "@/components/BookingModal";
+import CityAutocomplete from "@/components/CityAutocomplete";
+import SmartAlternatives from "@/components/SmartAlternatives";
+import CrowdBadge from "@/components/CrowdBadge";
+import CrowdNudgeModal from "@/components/CrowdNudgeModal";
 import { CardSkeleton } from "@/components/Skeleton";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
+import { Landmark, Compass } from "lucide-react";
 import {
-  Search,
   MapPin,
   Star,
   CloudSun,
@@ -133,6 +138,10 @@ export default function DiscoverPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [bookingHotel, setBookingHotel] = useState<typeof sampleHotels[0] | null>(null);
+  const [crowdData, setCrowdData] = useState<{ destination: any; alternatives: any[] } | null>(null);
+  const [showNudge, setShowNudge] = useState(false);
+  const [heritageSites, setHeritageSites] = useState<any[]>([]);
+  const [localPartners, setLocalPartners] = useState<any[]>([]);
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev) => {
@@ -146,8 +155,29 @@ export default function DiscoverPage() {
   const handleSearch = (query: string) => {
     setLoading(true);
     setSelectedDestination(query);
+    // Fetch crowd data
+    fetch(`/api/decongestion?q=${encodeURIComponent(query)}`)
+      .then((r) => r.json())
+      .then((d) => setCrowdData(d))
+      .catch(() => {});
+    // Fetch heritage sites
+    fetch(`/api/heritage?destination=${encodeURIComponent(query)}`)
+      .then((r) => r.json())
+      .then((d) => setHeritageSites(d.sites || []))
+      .catch(() => {});
+    // Fetch local partners
+    fetch(`/api/local-partners?q=${encodeURIComponent(query)}`)
+      .then((r) => r.json())
+      .then((d) => setLocalPartners(d.partners || []))
+      .catch(() => {});
     setTimeout(() => setLoading(false), 1500);
   };
+
+  // Fetch initial data for default destination
+  useEffect(() => {
+    handleSearch(selectedDestination);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredHotels =
     activeFilter === "All"
@@ -174,6 +204,11 @@ export default function DiscoverPage() {
             <p className="mt-2 text-ink-500 sm:text-lg">
               Hotels, transport, weather, and attractions for your destination
             </p>
+            {crowdData?.destination && (
+              <div className="mt-3">
+                <CrowdBadge crowdScore={crowdData.destination.crowd_score} />
+              </div>
+            )}
           </motion.div>
 
           {/* Search bar */}
@@ -183,18 +218,13 @@ export default function DiscoverPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="relative mt-6 max-w-2xl"
           >
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-400" />
-            <input
-              type="text"
-              placeholder="Search any destination in India..."
+            <CityAutocomplete
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && searchQuery.trim()) {
-                  handleSearch(searchQuery.trim());
-                }
+              onChange={setSearchQuery}
+              onSelect={(s) => {
+                setSearchQuery(s.name);
+                handleSearch(s.name);
               }}
-              className="h-14 w-full rounded-2xl border-2 border-ink-200 bg-white pl-12 pr-4 text-base font-medium text-ink-800 placeholder:text-ink-300 transition-all focus:border-terra-400 focus:ring-4 focus:ring-terra-100 focus:outline-none shadow-sm"
             />
           </motion.div>
 
@@ -220,6 +250,16 @@ export default function DiscoverPage() {
               </button>
             ))}
           </motion.div>
+
+          {/* Smart Alternatives for high-pressure destinations */}
+          {crowdData?.alternatives && crowdData.alternatives.length > 0 && (
+            <div className="mt-6">
+              <SmartAlternatives
+                alternatives={crowdData.alternatives}
+                sourceName={selectedDestination}
+              />
+            </div>
+          )}
         </div>
       </section>
 
@@ -410,7 +450,13 @@ export default function DiscoverPage() {
                                     <Navigation className="h-3.5 w-3.5" />
                                   </a>
                                   <button
-                                    onClick={() => setBookingHotel(hotel)}
+                                    onClick={() => {
+                                      if (crowdData?.destination?.crowd_score >= 70) {
+                                        setShowNudge(true);
+                                      } else {
+                                        setBookingHotel(hotel);
+                                      }
+                                    }}
                                     className="flex items-center gap-1 rounded-lg bg-terra-500 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-terra-600 active:scale-95"
                                   >
                                     Book
@@ -520,6 +566,79 @@ export default function DiscoverPage() {
                   </div>
                 </div>
               </SectionReveal>
+
+              {/* Heritage Sites */}
+              {heritageSites.length > 0 && (
+                <SectionReveal delay={0.3}>
+                  <div className="rounded-2xl border border-ink-100 bg-white p-5">
+                    <h3 className="flex items-center gap-2 font-display text-lg font-bold text-ink-800">
+                      <Landmark className="h-5 w-5 text-amber-500" />
+                      Heritage Sites
+                    </h3>
+                    <div className="mt-4 space-y-2">
+                      {heritageSites.map((site: any) => (
+                        <a
+                          key={site.id}
+                          href={`/heritage/${site.id}`}
+                          className="flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-amber-50"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-ink-700">
+                              {site.name}
+                            </p>
+                            <p className="text-xs text-ink-500 capitalize">
+                              {site.category}
+                            </p>
+                          </div>
+                          <span className="rounded-lg bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700">
+                            Start Story →
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </SectionReveal>
+              )}
+
+              {/* Local Partners */}
+              {localPartners.length > 0 && (
+                <SectionReveal delay={0.35}>
+                  <div className="rounded-2xl border border-ink-100 bg-white p-5">
+                    <h3 className="flex items-center gap-2 font-display text-lg font-bold text-ink-800">
+                      <Compass className="h-5 w-5 text-sage-500" />
+                      Verified Local Stays
+                    </h3>
+                    <p className="mt-1 text-xs text-ink-500">
+                      Curated by our team — real properties, not API listings
+                    </p>
+                    <div className="mt-4 space-y-3">
+                      {localPartners.map((partner: any) => (
+                        <div
+                          key={partner.id}
+                          className="rounded-xl border border-ink-100 p-3 transition-colors hover:bg-ink-50"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-sm font-semibold text-ink-700">
+                                {partner.name}
+                              </p>
+                              <p className="text-xs text-ink-500 capitalize">
+                                {partner.type} · {partner.price_range}
+                              </p>
+                            </div>
+                            <span className="rounded-md bg-sage-50 px-2 py-0.5 text-[10px] font-semibold text-sage-600">
+                              Verified ✓
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-xs text-ink-500">
+                            {partner.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </SectionReveal>
+              )}
             </div>
           </div>
         </div>
@@ -534,6 +653,16 @@ export default function DiscoverPage() {
           hotel={bookingHotel}
         />
       )}
+
+      <CrowdNudgeModal
+        isOpen={showNudge}
+        onClose={() => {
+          setShowNudge(false);
+          // If they choose to proceed anyway, open the booking modal
+        }}
+        destinationName={selectedDestination}
+        alternatives={crowdData?.alternatives || []}
+      />
     </main>
   );
 }
