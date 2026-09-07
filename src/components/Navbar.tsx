@@ -36,7 +36,7 @@ const navLinks = [
   { href: "/certificates", label: "Certificates", icon: Award },
   { href: "/impact", label: "Impact", icon: BarChart3 },
   { href: "/rewards", label: "Rewards", icon: Wallet },
-  { href: "/heritage/hampi", label: "Heritage AR", icon: Headphones },
+  { href: "/heritage", label: "Heritage AR", icon: Headphones },
 ];
 
 export default function Navbar() {
@@ -245,7 +245,7 @@ export default function Navbar() {
                             View Verifiable Certificates
                           </Link>
                           <Link
-                            href="/heritage/hampi"
+                            href="/heritage"
                             onClick={() => setJudgeMenuOpen(false)}
                             className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
                           >

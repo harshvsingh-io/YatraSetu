@@ -84,8 +84,32 @@ export async function GET(req: NextRequest) {
   const language = req.nextUrl.searchParams.get("lang") || "en";
 
   if (siteId) {
-    const site = HERITAGE_SITES.find((s) => s.id === siteId);
+    const query = siteId.toLowerCase().trim();
+    let site = HERITAGE_SITES.find(
+      (s) =>
+        s.id.toLowerCase() === query ||
+        s.destination_name.toLowerCase() === query ||
+        s.name.toLowerCase().includes(query) ||
+        s.wikipedia_slug.toLowerCase() === query ||
+        s.wikipedia_slug.toLowerCase().replace(/_/g, "-") === query
+    );
+
     if (!site) {
+      // Dynamic fallback for any heritage site in India
+      const wikiSummary = await fetchWikipediaSummary(siteId);
+      if (wikiSummary) {
+        const dynamicSite = {
+          id: siteId,
+          destination_name: siteId.charAt(0).toUpperCase() + siteId.slice(1),
+          name: siteId.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          lat: 15.335,
+          lng: 76.46,
+          wikipedia_slug: siteId,
+          category: "heritage",
+        };
+        const story = await generateStory(dynamicSite.name, wikiSummary, language);
+        return NextResponse.json({ site: dynamicSite, story, wikiSummary });
+      }
       return NextResponse.json({ error: "Site not found" }, { status: 404 });
     }
 
