@@ -87,7 +87,7 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithPhone: (phone: string, otp?: string, role?: UserProfile["role"]) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  signInDemo: (type?: "volunteer" | "traveler") => void;
+  signInDemo: (type?: "volunteer" | "traveler" | "student-nss") => void;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => void;
   addBooking: (booking: Omit<BookingRecord, "id" | "createdAt" | "status">) => BookingRecord;
@@ -225,8 +225,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   };
 
-  const signInDemo = (type: "volunteer" | "traveler" = "volunteer") => {
-    if (type === "volunteer") {
+  const signInDemo = (type: "volunteer" | "traveler" | "student-nss" = "volunteer") => {
+    if (type === "volunteer" || type === "student-nss") {
       saveSession(DEFAULT_USER);
     } else {
       saveSession({

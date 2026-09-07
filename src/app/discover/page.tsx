@@ -15,9 +15,10 @@ import CrowdNudgeModal from "@/components/CrowdNudgeModal";
 import { CardSkeleton } from "@/components/Skeleton";
 import { useLiveWeather } from "@/lib/useLiveWeather";
 import AIItineraryModal from "@/components/AIItineraryModal";
+import CityStayMap from "@/components/CityStayMap";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { Landmark, Compass, Car, Sparkles, ShieldCheck } from "lucide-react";
+import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List } from "lucide-react";
 import {
   MapPin,
   Star,
@@ -138,17 +139,19 @@ export default function DiscoverPage() {
   const [selectedDestination, setSelectedDestination] = useState("Goa");
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [bookingHotel, setBookingHotel] = useState<typeof sampleHotels[0] | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [favorites, setFavorites] = useState<Set<number | string>>(new Set());
+  const [bookingHotel, setBookingHotel] = useState<any | null>(null);
   const [crowdData, setCrowdData] = useState<{ destination: any; alternatives: any[] } | null>(null);
   const [showNudge, setShowNudge] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
   const [heritageSites, setHeritageSites] = useState<any[]>([]);
   const [localPartners, setLocalPartners] = useState<any[]>([]);
+  const [hotels, setHotels] = useState<any[]>(sampleHotels);
 
   const { weather: liveWeather } = useLiveWeather(selectedDestination);
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: number | string) => {
     setFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -175,7 +178,31 @@ export default function DiscoverPage() {
       .then((r) => r.json())
       .then((d) => setLocalPartners(d.partners || []))
       .catch(() => {});
-    setTimeout(() => setLoading(false), 1500);
+    // Fetch dynamic places and hotels
+    fetch(`/api/places?q=${encodeURIComponent(query)}&type=hotel`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.places && d.places.length > 0) {
+          setHotels(
+            d.places.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              location: p.address,
+              rating: p.rating,
+              reviews: p.reviews || 380,
+              priceRange: p.priceRange || `₹${p.priceNum || 3500}/night`,
+              priceNum: p.priceNum || 3500,
+              image: p.photo || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop",
+              type: p.type || "Hotel",
+              amenities: p.amenities || ["Eco-Friendly", "Wifi"],
+              lat: p.lat,
+              lng: p.lng,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+    setTimeout(() => setLoading(false), 1200);
   };
 
   // Fetch initial data for default destination
@@ -186,9 +213,9 @@ export default function DiscoverPage() {
 
   const filteredHotels =
     activeFilter === "All"
-      ? sampleHotels
-      : sampleHotels.filter(
-          (h) => h.type.toLowerCase() === activeFilter.toLowerCase()
+      ? hotels
+      : hotels.filter(
+          (h) => h.type?.toLowerCase() === activeFilter.toLowerCase()
         );
 
   return (
@@ -377,19 +404,55 @@ export default function DiscoverPage() {
                     {tab}
                   </button>
                 ))}
-                <div className="ml-auto flex items-center gap-2 text-sm text-ink-500">
-                  <Filter className="h-4 w-4" />
-                  <span>{filteredHotels.length} results</span>
+                <div className="ml-auto flex items-center gap-3">
+                  <div className="flex items-center gap-1 rounded-xl bg-earth-100 p-1 border border-earth-200">
+                    <button
+                      onClick={() => setViewMode("list")}
+                      className={cn(
+                        "flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold transition-all",
+                        viewMode === "list" ? "bg-white text-ink-900 shadow-xs" : "text-ink-600 hover:text-ink-900"
+                      )}
+                    >
+                      <List className="h-3.5 w-3.5" />
+                      <span>List</span>
+                    </button>
+                    <button
+                      onClick={() => setViewMode("map")}
+                      className={cn(
+                        "flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold transition-all",
+                        viewMode === "map" ? "bg-white text-amber-800 shadow-xs" : "text-ink-600 hover:text-ink-900"
+                      )}
+                    >
+                      <Map className="h-3.5 w-3.5 text-amber-600" />
+                      <span>Stay Map</span>
+                    </button>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-ink-500">
+                    <Filter className="h-3.5 w-3.5" />
+                    <span>{filteredHotels.length} stays</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Hotel cards */}
+              {/* Hotel cards or Map view */}
               {loading ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {[1, 2, 3, 4].map((i) => (
                     <CardSkeleton key={i} />
                   ))}
                 </div>
+              ) : viewMode === "map" ? (
+                <CityStayMap
+                  city={selectedDestination}
+                  hotels={filteredHotels}
+                  onSelectHotel={(hotel) => {
+                    if (crowdData?.destination?.crowd_score >= 70) {
+                      setShowNudge(true);
+                    } else {
+                      setBookingHotel(hotel);
+                    }
+                  }}
+                />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <AnimatePresence>
@@ -456,7 +519,7 @@ export default function DiscoverPage() {
 
                               {/* Amenities */}
                               <div className="mt-3 flex gap-1.5">
-                                {hotel.amenities.map((a) => (
+                                {hotel.amenities?.map((a: string) => (
                                   <span
                                     key={a}
                                     className="rounded-md bg-ink-50 px-2 py-0.5 text-[11px] font-medium text-ink-600"

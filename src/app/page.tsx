@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import JudgeShowcase from "@/components/JudgeShowcase";
 import UnderratedPicks from "@/components/UnderratedPicks";
 import HowItWorks from "@/components/HowItWorks";
 import HowWeVerify from "@/components/HowWeVerify";
@@ -14,6 +15,7 @@ export default function Home() {
     <main className="min-h-screen">
       <Navbar />
       <Hero />
+      <JudgeShowcase />
       <UnderratedPicks />
       <Partners />
       <HowItWorks />

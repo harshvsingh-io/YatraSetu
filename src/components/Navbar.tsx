@@ -21,25 +21,37 @@ import {
   Globe,
   ChevronDown,
   Sparkles,
+  QrCode,
+  Compass,
+  Zap,
+  PhoneCall,
+  Headphones,
+  CheckCircle2,
 } from "lucide-react";
+import QRCheckInModal from "@/components/QRCheckInModal";
 
 const navLinks = [
   { href: "/discover", label: "Discover", icon: MapPin },
   { href: "/events", label: "Events", icon: Calendar },
-  { href: "/rewards", label: "Rewards", icon: Wallet },
+  { href: "/certificates", label: "Certificates", icon: Award },
   { href: "/impact", label: "Impact", icon: BarChart3 },
+  { href: "/rewards", label: "Rewards", icon: Wallet },
+  { href: "/heritage/hampi", label: "Heritage AR", icon: Headphones },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [judgeMenuOpen, setJudgeMenuOpen] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [currentLang, setCurrentLang] = useState<"EN" | "HI">("EN");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const judgeMenuRef = useRef<HTMLDivElement>(null);
 
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoggedIn, signOut } = useAuth();
+  const { user, isLoggedIn, signOut, signInDemo } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -52,11 +64,14 @@ export default function Navbar() {
     setProfileDropdownOpen(false);
   }, [pathname]);
 
-  // Click outside to close profile dropdown
+  // Click outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setProfileDropdownOpen(false);
+      }
+      if (judgeMenuRef.current && !judgeMenuRef.current.contains(event.target as Node)) {
+        setJudgeMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -67,6 +82,12 @@ export default function Navbar() {
     await signOut();
     setProfileDropdownOpen(false);
     router.push("/");
+  };
+
+  const handleDemoSelect = (role: "student-nss" | "traveler") => {
+    signInDemo(role);
+    setJudgeMenuOpen(false);
+    router.push("/profile");
   };
 
   const getInitials = (name: string) => {
@@ -86,7 +107,7 @@ export default function Navbar() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          scrolled ? "bg-white/85 backdrop-blur-md shadow-sm border-b border-earth-200/80 py-3" : "bg-transparent py-5"
+          scrolled ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-earth-200/80 py-2.5" : "bg-transparent py-4"
         )}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -107,7 +128,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden items-center gap-1 lg:flex">
+            <nav className="hidden items-center gap-0.5 xl:gap-1 lg:flex">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -115,14 +136,14 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "relative rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-200",
+                      "relative rounded-xl px-3 py-2 text-xs xl:text-sm font-semibold transition-colors duration-200",
                       isActive
-                        ? "text-amber-800"
+                        ? "text-amber-800 font-bold"
                         : "text-ink-600 hover:text-ink-900 hover:bg-earth-100/70"
                     )}
                   >
                     <span className="relative z-10 flex items-center gap-1.5">
-                      <link.icon className="h-4 w-4" />
+                      <link.icon className="h-3.5 w-3.5 xl:h-4 xl:w-4" />
                       {link.label}
                     </span>
                     {isActive && (
@@ -137,12 +158,119 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Desktop Right Side (Language + Auth) */}
-            <div className="hidden items-center gap-3 lg:flex">
+            {/* Desktop Right Side (Judge Demo + Language + Auth) */}
+            <div className="hidden items-center gap-2.5 lg:flex">
+              {/* Judge Demo Dropdown */}
+              <div className="relative" ref={judgeMenuRef}>
+                <button
+                  onClick={() => setJudgeMenuOpen(!judgeMenuOpen)}
+                  className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-1.5 text-xs font-bold text-amber-900 hover:border-amber-400 hover:shadow-xs transition-all"
+                  title="SIH 2026 Judge Feature Testing"
+                >
+                  <Zap className="h-3.5 w-3.5 text-amber-600 fill-amber-500 animate-pulse" />
+                  <span>Judge Demo</span>
+                  <ChevronDown className="h-3 w-3 text-amber-700" />
+                </button>
+
+                <AnimatePresence>
+                  {judgeMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-72 rounded-2xl border border-amber-200 bg-white p-2.5 shadow-2xl z-50"
+                    >
+                      <div className="p-2.5 border-b border-earth-100 bg-amber-50/60 rounded-xl mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping" />
+                          <p className="text-xs font-bold text-amber-900">SIH 2026 Judge Fast Access</p>
+                        </div>
+                        <p className="text-[11px] text-ink-500 mt-0.5">
+                          1-click test all SIH26202 mandatory deliverables
+                        </p>
+                      </div>
+
+                      <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-400">
+                        1-Click Test Profiles
+                      </p>
+                      <div className="space-y-1 mb-2">
+                        <button
+                          onClick={() => handleDemoSelect("student-nss")}
+                          className="flex w-full items-center gap-2.5 rounded-xl p-2 text-left hover:bg-sage-50 transition-colors border border-transparent hover:border-sage-200"
+                        >
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sage-500 text-[11px] font-bold text-white">
+                            AS
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-ink-800">Aarav Sharma (NSS)</p>
+                            <p className="text-[10px] text-sage-600">1,250 Karma • 3 Certs • 1 Booking</p>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => handleDemoSelect("traveler")}
+                          className="flex w-full items-center gap-2.5 rounded-xl p-2 text-left hover:bg-terra-50 transition-colors border border-transparent hover:border-terra-200"
+                        >
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-terra-500 text-[11px] font-bold text-white">
+                            PP
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-ink-800">Priya Patel (Traveler)</p>
+                            <p className="text-[10px] text-terra-600">850 Karma • 2 Certs • 2 Bookings</p>
+                          </div>
+                        </button>
+                      </div>
+
+                      <div className="border-t border-earth-100 pt-2">
+                        <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-400">
+                          Feature Quick-Launch
+                        </p>
+                        <div className="space-y-0.5">
+                          <button
+                            onClick={() => {
+                              setJudgeMenuOpen(false);
+                              setShowQRModal(true);
+                            }}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <QrCode className="h-3.5 w-3.5 text-amber-600" />
+                            Test Rotating QR Check-in
+                          </button>
+                          <Link
+                            href="/certificates"
+                            onClick={() => setJudgeMenuOpen(false)}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <Award className="h-3.5 w-3.5 text-sage-600" />
+                            View Verifiable Certificates
+                          </Link>
+                          <Link
+                            href="/heritage/hampi"
+                            onClick={() => setJudgeMenuOpen(false)}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <Headphones className="h-3.5 w-3.5 text-terra-600" />
+                            Launch AR Audio Storyteller
+                          </Link>
+                          <Link
+                            href="/discover"
+                            onClick={() => setJudgeMenuOpen(false)}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <Compass className="h-3.5 w-3.5 text-blue-600" />
+                            Live Weather & Decongestion
+                          </Link>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               {/* Language Switcher */}
               <button
                 onClick={() => setCurrentLang((prev) => (prev === "EN" ? "HI" : "EN"))}
-                className="flex items-center gap-1.5 rounded-xl border border-earth-300/80 bg-white/60 px-3 py-1.5 text-xs font-semibold text-ink-700 transition-all hover:bg-earth-100"
+                className="flex items-center gap-1 rounded-xl border border-earth-300/80 bg-white/70 px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-all hover:bg-earth-100"
                 title="Toggle Language"
               >
                 <Globe className="h-3.5 w-3.5 text-amber-600" />
@@ -154,9 +282,9 @@ export default function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center gap-2.5 rounded-2xl border border-earth-200 bg-white p-1.5 pr-3 shadow-sm hover:border-earth-300 transition-all"
+                    className="flex items-center gap-2 rounded-2xl border border-earth-200 bg-white p-1 pr-3 shadow-xs hover:border-earth-300 transition-all"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-terra-500 text-xs font-bold text-white shadow-sm">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-terra-500 text-xs font-bold text-white shadow-xs">
                       {getInitials(user.name)}
                     </div>
                     <div className="flex flex-col text-left">
@@ -203,7 +331,7 @@ export default function Navbar() {
                             className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-ink-700 hover:bg-earth-100 transition-colors"
                           >
                             <User className="h-4 w-4 text-ink-500" />
-                            My Profile
+                            My Profile & Stats
                           </Link>
                           <Link
                             href="/profile#bookings"
@@ -246,13 +374,13 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="rounded-xl px-4 py-2 text-sm font-semibold text-ink-700 transition-colors hover:bg-earth-100"
+                    className="rounded-xl px-3.5 py-2 text-xs xl:text-sm font-semibold text-ink-700 transition-colors hover:bg-earth-100"
                   >
                     Sign in
                   </Link>
                   <Link
                     href="/login"
-                    className="group relative overflow-hidden rounded-xl bg-ink-900 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-ink-800 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                    className="group relative overflow-hidden rounded-xl bg-ink-900 px-4 py-2 text-xs xl:text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-ink-800 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <span className="relative z-10">Get Started</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-terra-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -392,6 +520,18 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Quick QR Check-in Demo Modal */}
+      <QRCheckInModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        event={{
+          id: 1,
+          title: "Calangute Beach Cleanup Drive",
+          location: "Calangute, Goa",
+          organizer: "Goa Green Brigade & NSS",
+        }}
+      />
     </>
   );
 }
