@@ -114,31 +114,31 @@ export default function Hero() {
           {/* Left Column — Content */}
           <div className="flex flex-col gap-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-800">
-                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-                Smart India Hackathon 2026 · PS SIH26202
+              <span className="inline-flex items-center gap-2 rounded-full border border-earth-300/80 bg-white/90 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-ink-800 shadow-2xs">
+                <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>India&apos;s 1st Mindful Travel & Seva Platform</span>
               </span>
             </motion.div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="font-display text-[clamp(2.4rem,4.8vw,4.2rem)] leading-[1.05] tracking-tight text-ink-900 font-bold"
+                className="font-display text-[clamp(2.6rem,5.2vw,4.4rem)] leading-[1.04] tracking-tight text-ink-950 font-extrabold"
               >
-                Every Journey
+                Where Every Journey
                 <br />
                 Becomes{" "}
                 <span className="relative inline-block">
-                  <span className="relative z-10 bg-gradient-to-r from-amber-500 via-amber-600 to-terra-500 bg-clip-text text-transparent">
+                  <span className="relative z-10 bg-gradient-to-r from-amber-600 via-terra-500 to-amber-700 bg-clip-text text-transparent">
                     Seva
                   </span>
                   <motion.span
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ duration: 0.8, delay: 0.8 }}
-                    className="absolute bottom-1 left-0 right-0 h-3 -rotate-1 bg-amber-200/70 sm:bottom-2 sm:h-4 origin-left"
+                    className="absolute bottom-1 left-0 right-0 h-3 -rotate-1 bg-amber-200/80 sm:bottom-2 sm:h-4 origin-left"
                   />
                 </span>
               </motion.h1>
@@ -146,9 +146,9 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
-                className="font-display text-[clamp(1.4rem,2.8vw,2.2rem)] leading-[1.1] text-amber-800/80 italic font-semibold"
+                className="font-display text-[clamp(1.3rem,2.6vw,2rem)] leading-snug text-amber-900/80 font-semibold tracking-tight"
               >
-                यात्रा बने सेवा, बिना भीड़ के
+                यात्रा बने सेवा · Sustainable, Verified & Crowd-Free
               </motion.p>
             </div>
 
@@ -158,7 +158,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="max-w-lg text-sm sm:text-base leading-relaxed text-ink-600 font-normal"
             >
-              India's first smart travel platform that reroutes tourism away from saturated hotspots, guides you with AI heritage storytelling, and lets you restore local ecosystems while earning verified rewards.
+              Discover serene, offbeat destinations across India. Restore fragile ecosystems alongside verified NGOs, immerse in AI heritage storytelling, and earn redeemable Green Karma rewards.
             </motion.p>
 
             {/* CTAs */}
@@ -166,69 +166,81 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex flex-wrap gap-3.5"
+              className="flex flex-wrap items-center gap-3.5"
             >
               <Link href="/discover">
-                <Button size="lg" variant="warm">
-                  Explore Destinations <ArrowRight className="h-4 w-4" />
+                <Button size="lg" variant="warm" className="shadow-lg shadow-amber-500/20">
+                  Explore Destinations <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </Link>
               <Link href="/events">
-                <Button size="lg" variant="outline">
-                  <Play className="h-4 w-4 fill-current text-amber-600" />
-                  Join an Event
+                <Button size="lg" variant="outline" className="border-earth-300 bg-white/80 hover:bg-white">
+                  <Play className="h-3.5 w-3.5 fill-amber-600 text-amber-600 mr-1.5" />
+                  Upcoming Seva Drives
                 </Button>
               </Link>
             </motion.div>
 
-            {/* Quick-Search Widget */}
+            {/* High-Craft Floating Search Pill */}
             <motion.form
               onSubmit={handleQuickSearch}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-2 flex flex-col sm:flex-row items-center gap-2 rounded-2xl border border-earth-300 bg-white p-2 shadow-md sm:max-w-lg"
+              className="mt-1 flex flex-col sm:flex-row items-center gap-2 rounded-2xl border border-earth-300/90 bg-white/95 p-2 shadow-xl backdrop-blur-md sm:max-w-lg"
             >
-              <div className="flex items-center gap-2 px-3 py-1.5 w-full sm:w-auto flex-1">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 w-full sm:w-auto flex-1">
                 <MapPin className="h-4 w-4 text-amber-600 shrink-0" />
-                <input
-                  type="text"
-                  value={quickDest}
-                  onChange={(e) => setQuickDest(e.target.value)}
-                  placeholder="e.g. Kasol, Goa, Munnar..."
-                  className="w-full text-xs text-ink-900 placeholder:text-ink-400 focus:outline-none bg-transparent"
-                />
+                <div className="flex flex-col w-full text-left">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-ink-400">Where to?</span>
+                  <input
+                    type="text"
+                    value={quickDest}
+                    onChange={(e) => setQuickDest(e.target.value)}
+                    placeholder="e.g. Kasol, Goa, Spiti, Munnar..."
+                    className="w-full text-xs font-semibold text-ink-900 placeholder:text-ink-400 focus:outline-none bg-transparent"
+                  />
+                </div>
               </div>
-              <div className="hidden sm:block h-6 w-px bg-earth-200" />
+              <div className="hidden sm:block h-8 w-px bg-earth-200" />
               <div className="flex items-center gap-2 px-3 py-1.5 w-full sm:w-auto">
                 <Calendar className="h-4 w-4 text-ink-400 shrink-0" />
-                <span className="text-xs text-ink-600 font-medium whitespace-nowrap">{quickMonth}</span>
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-ink-400">Season</span>
+                  <span className="text-xs text-ink-700 font-bold whitespace-nowrap">{quickMonth}</span>
+                </div>
               </div>
               <button
                 type="submit"
-                className="w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl bg-ink-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-ink-800 transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-ink-950 px-5 py-3 text-xs font-bold text-white hover:bg-amber-600 transition-all shadow-md shrink-0"
               >
                 <Search className="h-3.5 w-3.5" />
                 <span>Search</span>
               </button>
             </motion.form>
 
-            {/* Volunteer counter */}
+            {/* Social Proof & Trust Bar */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="flex items-center gap-4 pt-1"
+              className="flex items-center gap-3 pt-1"
             >
-              <div className="flex -space-x-2">
-                {["bg-amber-500", "bg-terra-500", "bg-sage-500", "bg-ink-700"].map((bg, i) => (
-                  <div key={i} className={`h-8 w-8 rounded-full ${bg} border-2 border-earth-50 ring-1 ring-black/10 flex items-center justify-center text-[10px] font-bold text-white`}>
-                    {["AK", "AS", "RV", "PM"][i]}
-                  </div>
+              <div className="flex -space-x-2 overflow-hidden">
+                {["https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop",
+                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop",
+                  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop",
+                  "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop"].map((avatar, idx) => (
+                  <img
+                    key={idx}
+                    className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover"
+                    src={avatar}
+                    alt="Active Volunteer"
+                  />
                 ))}
               </div>
-              <p className="text-xs text-ink-600">
-                <span className="font-bold text-ink-900">4,200+</span> active volunteers restoring India this week
+              <p className="text-xs text-ink-600 font-medium">
+                <strong className="font-bold text-ink-900">18,400+ volunteers</strong> from NSS & mindful travelers active
               </p>
             </motion.div>
           </div>

@@ -3,16 +3,23 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import CrowdBadge from "@/components/CrowdBadge";
 import SectionReveal from "@/components/SectionReveal";
-import { MapPin, ArrowRight, Compass, Mountain, Trees, Landmark } from "lucide-react";
+import { MapPin, ArrowRight, Compass, Sparkles, ShieldCheck, Leaf } from "lucide-react";
 import type { DestinationMetric } from "@/lib/seed-data";
-import { getCrowdLevel } from "@/lib/seed-data";
+
+const DESTINATION_PHOTOS: Record<string, string> = {
+  Kasol: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&h=600&fit=crop",
+  "Tirthan Valley": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop",
+  Gokarna: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&h=600&fit=crop",
+  Orchha: "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&h=600&fit=crop",
+  Chopta: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop",
+  Hampi: "https://images.unsplash.com/photo-1600100397608-f010f444f475?w=800&h=600&fit=crop",
+  Munnar: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=600&fit=crop",
+  Pondicherry: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop",
+};
 
 export default function UnderratedPicks() {
-  const [picks, setPicks] = useState<
-    (DestinationMetric & { crowd_level: string })[]
-  >([]);
+  const [picks, setPicks] = useState<(DestinationMetric & { crowd_level: string })[]>([]);
 
   useEffect(() => {
     fetch("/api/decongestion?type=picks")
@@ -23,85 +30,96 @@ export default function UnderratedPicks() {
 
   if (picks.length === 0) return null;
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "hill_station":
-        return <Mountain className="h-6 w-6 text-sage-600" />;
-      case "beach":
-        return <Compass className="h-6 w-6 text-blue-600" />;
-      case "heritage":
-        return <Landmark className="h-6 w-6 text-amber-700" />;
-      case "spiritual":
-        return <Landmark className="h-6 w-6 text-terra-600" />;
-      default:
-        return <Trees className="h-6 w-6 text-sage-600" />;
-    }
-  };
-
   return (
-    <section className="py-16 sm:py-20 bg-white">
+    <section className="py-20 bg-gradient-to-b from-white via-earth-50/50 to-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionReveal>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-sage-50 px-4 py-1 text-xs font-semibold text-sage-700 border border-sage-200">
-                <Compass className="h-3.5 w-3.5" />
-                Beat the Crowd
+              <span className="inline-flex items-center gap-2 rounded-full bg-sage-50 px-3.5 py-1 text-xs font-bold text-sage-800 border border-sage-200 shadow-2xs">
+                <Compass className="h-3.5 w-3.5 text-sage-600" />
+                <span>AI Decongestion Engine</span>
               </span>
-              <h2 className="mt-4 font-display text-2xl font-bold text-ink-900 sm:text-3xl lg:text-4xl">
-                This Week&apos;s Underrated Picks
+              <h2 className="mt-3 font-display text-3xl font-bold text-ink-900 sm:text-4xl tracking-tight">
+                Underrated Hidden Gems
               </h2>
-              <p className="mt-2 max-w-lg text-ink-500">
-                Low crowd pressure, incredible experiences. These destinations
-                are waiting for you — no queues, no chaos.
+              <p className="mt-2 max-w-xl text-sm sm:text-base text-ink-500 leading-relaxed">
+                Rerouting tourism away from saturated hotspots. Experience pristine valleys, untouched beaches, and living heritage with zero queues.
               </p>
             </div>
+
+            <Link
+              href="/discover"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-800 hover:text-amber-900 group shrink-0"
+            >
+              <span>Explore all alternatives</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
         </SectionReveal>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {picks.map((pick, i) => (
-            <SectionReveal key={pick.id} delay={i * 0.06}>
-              <Link
-                href={`/discover?q=${encodeURIComponent(pick.name)}`}
-                className="group block overflow-hidden rounded-2xl border border-earth-200 bg-white transition-all hover:shadow-lg hover:-translate-y-1"
-              >
-                <div className="relative h-40 bg-gradient-to-br from-sage-50 via-earth-100 to-amber-50 flex items-center justify-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 shadow-sm border border-earth-200">
-                    {getCategoryIcon(pick.category)}
-                  </div>
-                  <div className="absolute left-3 top-3">
-                    <CrowdBadge crowdScore={pick.crowd_score} />
-                  </div>
-                  <div className="absolute bottom-3 right-3 rounded-lg bg-white/90 px-2.5 py-1 text-[10px] font-bold text-ink-700 backdrop-blur-sm border border-earth-200 uppercase tracking-wider">
-                    {pick.category.replace("_", " ")}
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-display text-lg font-bold text-ink-800 group-hover:text-sage-700">
+        {/* Destination Cards Grid */}
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {picks.map((pick, i) => {
+            const photo =
+              DESTINATION_PHOTOS[pick.name] ||
+              "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop";
+
+            return (
+              <SectionReveal key={pick.id} delay={i * 0.06}>
+                <Link
+                  href={`/discover?q=${encodeURIComponent(pick.name)}`}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-earth-200 bg-white shadow-xs transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-amber-300"
+                >
+                  {/* Photo with gradient overlay */}
+                  <div className="relative h-56 w-full overflow-hidden bg-earth-100">
+                    <img
+                      src={photo}
+                      alt={pick.name}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/20 to-transparent" />
+
+                    {/* Top Badges */}
+                    <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white border border-white/15">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                        {pick.crowd_score}% Crowd Pressure
+                      </span>
+                    </div>
+
+                    <span className="absolute top-3.5 right-3.5 rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-800 border border-earth-200">
+                      {pick.category.replace("_", " ")}
+                    </span>
+
+                    {/* Bottom Title on Image */}
+                    <div className="absolute bottom-3.5 left-3.5 right-3.5">
+                      <h3 className="font-display text-xl font-bold text-white tracking-tight">
                         {pick.name}
                       </h3>
-                      <div className="mt-0.5 flex items-center gap-1 text-sm text-ink-500">
-                        <MapPin className="h-3.5 w-3.5" />
-                        {pick.state}
+                      <div className="flex items-center gap-1 text-xs text-earth-200 mt-0.5">
+                        <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                        <span>{pick.state}</span>
                       </div>
                     </div>
-                    <ArrowRight className="mt-1 h-4 w-4 text-ink-300 transition-transform group-hover:translate-x-1 group-hover:text-sage-500" />
                   </div>
-                  <div className="mt-3 flex items-center justify-between text-xs">
-                    <span className="text-sage-600 font-semibold">
-                      +50 bonus points
-                    </span>
-                    <span className="text-ink-400">
-                      {pick.bookings_7d} bookings this week
-                    </span>
+
+                  {/* Card Content Footer */}
+                  <div className="p-4 flex items-center justify-between border-t border-earth-100">
+                    <div className="flex items-center gap-1.5 rounded-lg bg-sage-50 px-2.5 py-1 text-xs font-bold text-sage-700 border border-sage-200/80">
+                      <Leaf className="h-3.5 w-3.5 text-sage-600" />
+                      <span>+250 Green Karma</span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs font-bold text-ink-800 group-hover:text-amber-700 transition-colors">
+                      <span>Explore Stays</span>
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </SectionReveal>
-          ))}
+                </Link>
+              </SectionReveal>
+            );
+          })}
         </div>
       </div>
     </section>
