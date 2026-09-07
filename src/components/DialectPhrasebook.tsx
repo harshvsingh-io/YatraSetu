@@ -426,6 +426,17 @@ export default function DialectPhrasebook({
     return "marwari";
   });
 
+  React.useEffect(() => {
+    if (!initialDestination) return;
+    const norm = initialDestination.toLowerCase();
+    if (norm.includes("goa") || norm.includes("gokarna")) setSelectedRegionId("konkani");
+    else if (norm.includes("kasol") || norm.includes("manali") || norm.includes("tirthan") || norm.includes("jibhi") || norm.includes("spiti")) setSelectedRegionId("pahadi");
+    else if (norm.includes("leh") || norm.includes("ladakh") || norm.includes("nubra")) setSelectedRegionId("bhoti");
+    else if (norm.includes("chopta") || norm.includes("rishikesh") || norm.includes("uttarakhand") || norm.includes("kedarnath") || norm.includes("auli") || norm.includes("nainital") || norm.includes("mussoorie")) setSelectedRegionId("garhwali");
+    else if (norm.includes("kerala") || norm.includes("wayanad") || norm.includes("munnar") || norm.includes("alleppey") || norm.includes("kumarakom") || norm.includes("coorg")) setSelectedRegionId("malayalam");
+    else if (norm.includes("jaipur") || norm.includes("udaipur") || norm.includes("jaisalmer") || norm.includes("pushkar") || norm.includes("rajasthan") || norm.includes("jodhpur")) setSelectedRegionId("marwari");
+  }, [initialDestination]);
+
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [speakingPhrase, setSpeakingPhrase] = useState<string | null>(null);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -96,6 +96,17 @@ export default function CertificatesPage() {
   const [verifying, setVerifying] = useState(false);
   const [previewCert, setPreviewCert] = useState<Certificate | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const hash = params.get("hash");
+      if (hash) {
+        setSearchHash(hash);
+        handleVerify(hash);
+      }
+    }
+  }, []);
+
   const certificates = baseCertificates.map((c) => ({
     ...c,
     recipientName: isLoggedIn && user ? user.name : c.recipientName,
@@ -128,11 +139,20 @@ export default function CertificatesPage() {
   };
 
   const handlePrint = (cert: Certificate) => {
+    setPreviewCert(cert);
+    setTimeout(() => {
+      window.print();
+    }, 300);
+  };
+
+  const handleCopyLink = (hash: string) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://yatra-setu-black.vercel.app";
+    const url = `${origin}/certificates?hash=${encodeURIComponent(hash)}`;
+    navigator.clipboard.writeText(url);
     toast({
-      title: "Generating Official Certificate",
-      message: `Preparing certificate ${cert.certHash} for download...`,
+      title: "Link Copied!",
+      message: "Verifiable credential link copied to clipboard.",
     });
-    window.print();
   };
 
   return (
@@ -156,7 +176,31 @@ export default function CertificatesPage() {
           </motion.div>
 
           <div className="mt-4">
-            <SignInBanner message="Sign in with your student profile to view and download your verified service credentials." />
+            {isLoggedIn && user ? (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sage-200 bg-sage-50/80 px-4 py-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sage-600 text-white font-bold text-sm shadow-xs">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm font-bold text-sage-900">
+                      Active Credentials for {user.name}
+                    </p>
+                    <p className="text-[11px] text-sage-700">
+                      {user.role === "student-nss" ? "NSS Volunteer Registry" : "Verified Traveler"} · {user.stats.volunteerHours} Service Hours Logged · {user.stats.karmaPoints} Karma Points
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-sage-200/80 px-2.5 py-1 text-[11px] font-bold text-sage-800">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    Verified Citizen Registry
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <SignInBanner message="Sign in with your student profile to view and download your verified service credentials." />
+            )}
           </div>
 
           {/* Interactive Hash Verification Tool for Judges */}
@@ -308,13 +352,24 @@ export default function CertificatesPage() {
                       Authority: <span className="font-semibold text-ink-700">{cert.unit}</span>
                     </p>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-earth-100 pt-4">
-                      <button
-                        onClick={() => setPreviewCert(cert)}
-                        className="text-xs font-bold text-amber-800 hover:text-amber-900 underline"
-                      >
-                        Preview Document
-                      </button>
+                    <div className="mt-5 flex items-center justify-between border-t border-earth-100 pt-4 gap-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewCert(cert)}
+                          className="rounded-xl border border-earth-200 bg-earth-50 px-3 py-1.5 text-xs font-bold text-ink-800 hover:bg-earth-100 hover:border-earth-300 transition-colors"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLink(cert.certHash)}
+                          className="rounded-xl border border-earth-200 bg-earth-50 px-2.5 py-1.5 text-xs font-semibold text-ink-600 hover:bg-earth-100 hover:text-ink-900 transition-colors"
+                          title="Copy Verifiable Credential Link"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
 
                       {cert.status === "ready" ? (
                         <Button
@@ -327,8 +382,8 @@ export default function CertificatesPage() {
                           Download PDF
                         </Button>
                       ) : (
-                        <span className="text-[11px] text-ink-400">
-                          Ready post-audit
+                        <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/60">
+                          Auditing record...
                         </span>
                       )}
                     </div>
@@ -423,14 +478,24 @@ export default function CertificatesPage() {
               </div>
 
               {/* Modal Actions */}
-              <div className="mt-6 flex items-center justify-end gap-3">
-                <Button variant="secondary" onClick={() => setPreviewCert(null)}>
-                  Close
-                </Button>
-                <Button variant="primary" onClick={() => handlePrint(previewCert)}>
-                  <Printer className="h-4 w-4 mr-1.5" />
-                  Print / Save PDF
-                </Button>
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleCopyLink(previewCert.certHash)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-earth-200 bg-earth-50 px-3.5 py-2 text-xs font-semibold text-ink-700 hover:bg-earth-100 transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Copy Registry Link
+                </button>
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" onClick={() => setPreviewCert(null)}>
+                    Close
+                  </Button>
+                  <Button variant="primary" onClick={() => handlePrint(previewCert)}>
+                    <Printer className="h-4 w-4 mr-1.5" />
+                    Print / Save PDF
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </div>

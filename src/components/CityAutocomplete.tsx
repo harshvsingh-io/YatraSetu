@@ -36,24 +36,20 @@ export default function CityAutocomplete({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (value.length < 2) {
-      setSuggestions([]);
-      setOpen(false);
-      return;
-    }
-
     const timer = setTimeout(() => {
       setLoading(true);
-      fetch(`/api/cities?q=${encodeURIComponent(value)}`)
+      fetch(`/api/cities?q=${encodeURIComponent(value.trim())}`)
         .then((r) => r.json())
         .then((d) => {
           setSuggestions(d.suggestions || []);
-          setOpen(true);
+          if (document.activeElement === inputRef.current) {
+            setOpen(true);
+          }
           setSelectedIndex(-1);
         })
         .catch(() => setSuggestions([]))
         .finally(() => setLoading(false));
-    }, 400);
+    }, value.trim().length === 0 ? 0 : 150);
 
     return () => clearTimeout(timer);
   }, [value]);
@@ -119,28 +115,39 @@ export default function CityAutocomplete({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-ink-200 bg-white shadow-xl"
+            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-earth-200 bg-white shadow-2xl"
           >
-            {suggestions.map((s, i) => (
-              <button
-                key={`${s.name}-${s.lat}`}
-                onClick={() => handleSelect(s)}
-                className={cn(
-                  "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
-                  i === selectedIndex
-                    ? "bg-terra-50"
-                    : "hover:bg-ink-50"
-                )}
-              >
-                <MapPin className="h-4 w-4 shrink-0 text-ink-400" />
-                <div>
-                  <p className="text-sm font-semibold text-ink-800">{s.name}</p>
-                  {s.state && (
-                    <p className="text-xs text-ink-500">{s.state}</p>
+            <div className="bg-earth-50/80 px-4 py-2 border-b border-earth-100 flex items-center justify-between text-[11px] font-bold text-ink-500 uppercase tracking-wider">
+              <span>{value.trim().length === 0 ? "Trending Indian Destinations" : "Suggestions for you"}</span>
+              <span className="text-[10px] font-normal text-amber-700 font-mono">Instant Search</span>
+            </div>
+            <div className="max-h-72 overflow-y-auto divide-y divide-earth-100">
+              {suggestions.map((s, i) => (
+                <button
+                  key={`${s.name}-${s.lat}`}
+                  onClick={() => handleSelect(s)}
+                  className={cn(
+                    "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
+                    i === selectedIndex
+                      ? "bg-amber-50"
+                      : "hover:bg-earth-50/80"
                   )}
-                </div>
-              </button>
-            ))}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-ink-900 truncate">{s.name}</p>
+                    {s.state && (
+                      <p className="text-xs text-ink-500 truncate">{s.displayName || s.state}</p>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-semibold text-earth-500 bg-earth-100 px-2 py-0.5 rounded-md shrink-0">
+                    Explore
+                  </span>
+                </button>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

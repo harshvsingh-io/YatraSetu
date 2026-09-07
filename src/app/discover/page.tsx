@@ -38,9 +38,124 @@ import {
 } from "lucide-react";
 
 const popularDestinations = [
-  "Goa", "Manali", "Jaipur", "Varanasi", "Darjeeling", "Kerala",
-  "Udaipur", "Rishikesh", "Andaman", "Leh Ladakh",
+  "Goa", "Manali", "Jaipur", "Varanasi", "Kasol", "Chopta", "Hampi",
+  "Orchha", "Gokarna", "Munnar", "Tirthan Valley", "Udaipur", "Rishikesh",
+  "Darjeeling", "Pondicherry", "Leh Ladakh",
 ];
+
+function getRestorationEvent(dest: string) {
+  const d = dest.toLowerCase();
+  if (d.includes("kasol")) {
+    return {
+      title: "Parvati River Trail Clean & Plastic Sweep",
+      location: "Chalal River Bank, Kasol",
+      time: "This Saturday · 7:30 AM",
+      volunteers: 84,
+    };
+  }
+  if (d.includes("chopta")) {
+    return {
+      title: "Tungnath Sacred Bugyal & Alpine Care",
+      location: "Chopta Meadow Base, Tungnath Trail",
+      time: "This Sunday · 7:00 AM",
+      volunteers: 62,
+    };
+  }
+  if (d.includes("hampi")) {
+    return {
+      title: "UNESCO Tungabhadra Heritage & River Clean",
+      location: "Vitthala Temple Complex & Ghats",
+      time: "Saturday · 6:30 AM",
+      volunteers: 118,
+    };
+  }
+  if (d.includes("orchha")) {
+    return {
+      title: "Betwa River Cenotaphs Heritage Care Drive",
+      location: "Royal Chhatris & Betwa River Bank",
+      time: "Sunday · 7:00 AM",
+      volunteers: 56,
+    };
+  }
+  if (d.includes("manali")) {
+    return {
+      title: "Beas River & Old Manali Pine Trail Cleanup",
+      location: "Hadimba Forest Trail, Manali",
+      time: "Saturday · 8:00 AM",
+      volunteers: 126,
+    };
+  }
+  if (d.includes("jaipur")) {
+    return {
+      title: "Amer Stepwell & Nahargarh Ridge Revival",
+      location: "Panna Meena Ka Kund, Amer",
+      time: "Sunday · 6:30 AM",
+      volunteers: 94,
+    };
+  }
+  if (d.includes("varanasi")) {
+    return {
+      title: "Ganga Ghats Silt Removal & Deep Seva",
+      location: "Assi to Dashashwamedh Ghats",
+      time: "Sunday · 6:00 AM",
+      volunteers: 210,
+    };
+  }
+  if (d.includes("gokarna")) {
+    return {
+      title: "Olive Ridley Coastal Dune Restoration",
+      location: "Kudle Beach & Cliff Trail",
+      time: "Sunday · 6:30 AM",
+      volunteers: 78,
+    };
+  }
+  if (d.includes("munnar")) {
+    return {
+      title: "Western Ghats Watershed Protection Walk",
+      location: "Pothamedu Tea Trails, Munnar",
+      time: "Saturday · 8:00 AM",
+      volunteers: 64,
+    };
+  }
+  if (d.includes("tirthan")) {
+    return {
+      title: "River Tirthan Trout Habitat Stream Clean",
+      location: "Gushaini National Park Buffer",
+      time: "Saturday · 7:30 AM",
+      volunteers: 48,
+    };
+  }
+  if (d.includes("udaipur")) {
+    return {
+      title: "Lake Pichola Shoreline Water Heritage Care",
+      location: "Ambrai & Gangaur Ghats",
+      time: "Sunday · 7:00 AM",
+      volunteers: 88,
+    };
+  }
+  if (d.includes("darjeeling")) {
+    return {
+      title: "Tiger Hill Ecological Trail Plastic Audit",
+      location: "Ghoom Observatory Ridge",
+      time: "Saturday · 7:00 AM",
+      volunteers: 52,
+    };
+  }
+  if (d.includes("pondicherry")) {
+    return {
+      title: "Promenade Dune & Mangrove Restoration",
+      location: "Chunnambar Estuary, Puducherry",
+      time: "Sunday · 6:30 AM",
+      volunteers: 72,
+    };
+  }
+  return {
+    title: `${dest} Ecological & Heritage Revival Drive`,
+    location: `Eco Heritage Corridor, ${dest}`,
+    time: "This Weekend · 7:00 AM",
+    volunteers: 65,
+  };
+}
 
 const sampleHotels = [
   {
@@ -151,6 +266,7 @@ export default function DiscoverPage() {
   const [heritageSites, setHeritageSites] = useState<any[]>([]);
   const [localPartners, setLocalPartners] = useState<any[]>([]);
   const [hotels, setHotels] = useState<any[]>(sampleHotels);
+  const [attractionsList, setAttractionsList] = useState<any[]>(attractions);
 
   const { weather: liveWeather } = useLiveWeather(selectedDestination);
 
@@ -181,8 +297,8 @@ export default function DiscoverPage() {
       .then((r) => r.json())
       .then((d) => setLocalPartners(d.partners || []))
       .catch(() => {});
-    // Fetch dynamic places and hotels
-    fetch(`/api/places?q=${encodeURIComponent(query)}&type=hotel`)
+    // Fetch dynamic places, hotels, and attractions
+    fetch(`/api/places?q=${encodeURIComponent(query)}&type=all`)
       .then((r) => r.json())
       .then((d) => {
         if (d.places && d.places.length > 0) {
@@ -203,13 +319,26 @@ export default function DiscoverPage() {
             }))
           );
         }
+        if (d.attractions && d.attractions.length > 0) {
+          setAttractionsList(d.attractions);
+        }
       })
       .catch(() => {});
-    setTimeout(() => setLoading(false), 1200);
+    setTimeout(() => setLoading(false), 800);
   };
 
-  // Fetch initial data for default destination
+  // Fetch initial data for destination (checking URL query param q first)
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const queryParam = params.get("q");
+      if (queryParam && queryParam.trim()) {
+        setSelectedDestination(queryParam.trim());
+        setSearchQuery(queryParam.trim());
+        handleSearch(queryParam.trim());
+        return;
+      }
+    }
     handleSearch(selectedDestination);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -594,9 +723,9 @@ export default function DiscoverPage() {
                     Nearby Attractions
                   </h3>
                   <div className="mt-4 space-y-3">
-                    {attractions.map((a) => (
+                    {attractionsList.slice(0, 5).map((a) => (
                       <div
-                        key={a.name}
+                        key={a.id || a.name}
                         className="flex items-center justify-between rounded-xl p-3 transition-colors hover:bg-ink-50"
                       >
                         <div>
@@ -607,12 +736,12 @@ export default function DiscoverPage() {
                             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                             {a.rating}
                             <span className="text-ink-300">·</span>
-                            {a.distance}
+                            {a.distance || a.address || "Local site"}
                           </div>
                         </div>
-                        <button className="rounded-lg bg-ink-50 p-2 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-600">
-                          <MapPin className="h-4 w-4" />
-                        </button>
+                        <span className="rounded-lg bg-earth-100 p-2 text-ink-500">
+                          <MapPin className="h-4 w-4 text-amber-600" />
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -623,17 +752,17 @@ export default function DiscoverPage() {
               <SectionReveal delay={0.1}>
                 <div className="rounded-2xl border border-ink-100 bg-white p-5">
                   <h3 className="font-display text-lg font-bold text-ink-800">
-                    Book Transport
+                    Book Transport to {selectedDestination}
                   </h3>
                   <p className="mt-1 text-sm text-ink-500">
-                    Deep links to official booking sites
+                    Deep links to verified booking providers
                   </p>
                   <div className="mt-4 space-y-2">
                     {[
-                      { label: "IRCTC — Trains", href: "https://www.irctc.co.in" },
-                      { label: "RedBus — Buses", href: "https://www.redbus.in" },
-                      { label: "Skyscanner — Flights", href: "https://www.skyscanner.co.in" },
-                      { label: "Ola — Local Cabs", href: "https://www.olacabs.com" },
+                      { label: `IRCTC — Trains to ${selectedDestination}`, href: "https://www.irctc.co.in" },
+                      { label: `RedBus — Buses to ${selectedDestination}`, href: "https://www.redbus.in" },
+                      { label: `Skyscanner — Flights to ${selectedDestination}`, href: "https://www.skyscanner.co.in" },
+                      { label: "Ola / Uber — Local Cabs", href: "https://www.olacabs.com" },
                     ].map((link) => (
                       <a
                         key={link.label}
@@ -651,32 +780,37 @@ export default function DiscoverPage() {
               </SectionReveal>
 
               {/* Nearby restoration event teaser */}
-              <SectionReveal delay={0.2}>
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sage-600 to-sage-700 p-5 text-white">
-                  <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-                  <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-white/5" />
-                  <div className="relative z-10">
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold">
-                      <Sparkles className="h-3.5 w-3.5" /> Nearby Restoration Event
-                    </span>
-                    <h3 className="mt-3 font-display text-lg font-bold">
-                      Goa Beach Cleanup
-                    </h3>
-                    <p className="mt-1 text-sm text-sage-100">
-                      Calangute Beach · This Saturday · 7:00 AM
-                    </p>
-                    <p className="mt-2 text-xs text-sage-200">
-                      142 volunteers already joined
-                    </p>
-                    <a
-                      href="/events"
-                      className="mt-4 inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-sage-700 transition-all hover:bg-sage-50 active:scale-95"
-                    >
-                      RSVP Now →
-                    </a>
-                  </div>
-                </div>
-              </SectionReveal>
+              {(() => {
+                const event = getRestorationEvent(selectedDestination);
+                return (
+                  <SectionReveal delay={0.2}>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sage-600 to-sage-700 p-5 text-white">
+                      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
+                      <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-white/5" />
+                      <div className="relative z-10">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold">
+                          <Sparkles className="h-3.5 w-3.5" /> Verified Restoration Drive
+                        </span>
+                        <h3 className="mt-3 font-display text-lg font-bold">
+                          {event.title}
+                        </h3>
+                        <p className="mt-1 text-sm text-sage-100">
+                          {event.location} · {event.time}
+                        </p>
+                        <p className="mt-2 text-xs text-sage-200">
+                          {event.volunteers} volunteers enrolled
+                        </p>
+                        <Link
+                          href="/events"
+                          className="mt-4 inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-sage-700 transition-all hover:bg-sage-50 active:scale-95"
+                        >
+                          RSVP & Earn Karma →
+                        </Link>
+                      </div>
+                    </div>
+                  </SectionReveal>
+                );
+              })()}
 
               {/* Heritage Sites */}
               {heritageSites.length > 0 && (

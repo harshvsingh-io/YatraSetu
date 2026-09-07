@@ -8,13 +8,13 @@ import { MapPin, ArrowRight, Compass, Sparkles, ShieldCheck, Leaf } from "lucide
 import type { DestinationMetric } from "@/lib/seed-data";
 
 const DESTINATION_PHOTOS: Record<string, string> = {
-  Kasol: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&h=600&fit=crop",
-  "Tirthan Valley": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop",
-  Gokarna: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&h=600&fit=crop",
-  Orchha: "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&h=600&fit=crop",
-  Chopta: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop",
-  Hampi: "https://images.unsplash.com/photo-1600100397608-f010f444f475?w=800&h=600&fit=crop",
-  Munnar: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=600&fit=crop",
+  Kasol: "https://images.unsplash.com/photo-1675515642093-4fd5b6cca657?w=800&h=600&fit=crop",
+  "Tirthan Valley": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=600&fit=crop",
+  Gokarna: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=600&fit=crop",
+  Orchha: "https://images.unsplash.com/photo-1642152654554-1c6d6e86c967?w=800&h=600&fit=crop",
+  Chopta: "https://images.unsplash.com/photo-1631866647491-d3774677e0d5?w=800&h=600&fit=crop",
+  Hampi: "https://images.unsplash.com/photo-1670280226105-c9210a22274d?w=800&h=600&fit=crop",
+  Munnar: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800&h=600&fit=crop",
   Pondicherry: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop",
 };
 

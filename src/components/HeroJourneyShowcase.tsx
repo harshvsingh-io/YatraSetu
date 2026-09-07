@@ -101,7 +101,7 @@ const journeyOptions: JourneyOption[] = [
     weather: "Clear Mountain View",
     hotelName: "Monal Eco-Nest Wooden Cabin",
     pricePerNight: "₹2,400/night",
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=520&fit=crop",
+    image: "https://images.unsplash.com/photo-1631866647491-d3774677e0d5?w=800&h=520&fit=crop",
     eventTitle: "Tungnath Sacred Trail Plastic Sweep",
     eventTime: "Oct 12 · 7:00 AM",
     eventKarma: 250,
