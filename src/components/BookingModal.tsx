@@ -404,6 +404,23 @@ export default function BookingModal({
                         <Copy className="h-3.5 w-3.5" />
                       </button>
                     </div>
+                    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-left flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                        <div>
+                          <p className="text-xs font-bold text-amber-900">Zero-Network Remote Pass Ready</p>
+                          <p className="text-[10px] text-amber-700">Works 100% offline in airplane mode</p>
+                        </div>
+                      </div>
+                      <Link
+                        href={`/offline-pass?id=${bookingId}`}
+                        onClick={resetAndClose}
+                        className="rounded-lg bg-amber-600 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-xs hover:bg-amber-700 transition-colors"
+                      >
+                        Save Pass →
+                      </Link>
+                    </div>
+
                     <div className="mt-6 flex gap-3">
                       <Link
                         href="/profile#bookings"

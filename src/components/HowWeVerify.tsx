@@ -1,11 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { QrCode, Camera, ShieldCheck, Award, ArrowRight, Sparkles } from "lucide-react";
+import {
+  QrCode,
+  Camera,
+  ShieldCheck,
+  Award,
+  ArrowRight,
+  Sparkles,
+  RefreshCw,
+  MapPin,
+  CheckCircle2,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function HowWeVerify() {
+  const [countdown, setCountdown] = useState(15);
+  const [tokenSeed, setTokenSeed] = useState("YS-GOA-7821");
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          setTokenSeed(`YS-SEED-${Math.floor(1000 + Math.random() * 9000)}`);
+          return 15;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const steps = [
     {
       num: "01",
@@ -18,7 +44,7 @@ export default function HowWeVerify() {
     {
       num: "02",
       title: "Geo-Fenced & Time-Stamped Selfie",
-      desc: "Upon scanning, the volunteer snaps an instant selfie. The browser's native Geolocation API verifies that the coordinates are strictly within 200 meters of the restoration perimeter.",
+      desc: "Upon scanning, the volunteer snaps an instant selfie. The browser's native Geolocation API verifies that coordinates match strictly within 200m of the restoration perimeter.",
       icon: Camera,
       tag: "GPS Perimeter Match",
       color: "bg-terra-50 text-terra-700 border-terra-200",
@@ -26,7 +52,7 @@ export default function HowWeVerify() {
     {
       num: "03",
       title: "Tamper-Proof Digital Credential",
-      desc: "Once validated, Green Karma points and a cryptographic Certificate of Seva (issued with Ministry of Tourism & NSS metadata) are deposited directly into the traveler's digital passport.",
+      desc: "Once validated, Green Karma points and an auditable Certificate of Seva (issued with Ministry of Tourism & NSS metadata) are deposited directly into the traveler's passport.",
       icon: ShieldCheck,
       tag: "Instant Karma & Cert",
       color: "bg-sage-50 text-sage-700 border-sage-200",
@@ -66,7 +92,48 @@ export default function HowWeVerify() {
           </motion.p>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-3">
+        {/* Interactive Live Dynamic QR Preview Banner */}
+        <div className="mt-12 max-w-3xl mx-auto rounded-3xl border border-amber-200 bg-white p-5 shadow-md">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-earth-50 border border-earth-200">
+                <QrCode className="h-10 w-10 text-ink-900" />
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white">
+                  {countdown}
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                    Live Anti-Fraud Engine
+                  </span>
+                  <span className="rounded-full bg-amber-100 px-2 py-0.2 text-[10px] font-mono font-bold text-amber-900">
+                    Token: {tokenSeed}
+                  </span>
+                </div>
+                <p className="text-xs text-ink-600 mt-1">
+                  Rotating dynamic seed refreshes every 15s • Screenshot proof active
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-sage-800 bg-sage-50 px-3 py-1.5 rounded-xl border border-sage-200 font-semibold">
+                <CheckCircle2 className="h-4 w-4 text-sage-600" />
+                <span>200m Geo-Fenced</span>
+              </div>
+              <Link
+                href="/events"
+                className="rounded-xl bg-ink-900 px-4 py-2 text-xs font-bold text-white hover:bg-ink-800 transition-colors"
+              >
+                Test Simulator
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Step Cards */}
+        <div className="mt-12 grid gap-8 lg:grid-cols-3">
           {steps.map((s, i) => (
             <motion.div
               key={s.num}

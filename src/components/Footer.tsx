@@ -5,20 +5,20 @@ const footerLinks = {
   Product: [
     { label: "Discover & Book", href: "/discover" },
     { label: "Restoration Events", href: "/events" },
-    { label: "Rewards", href: "/rewards" },
-    { label: "Impact Dashboard", href: "/impact" },
+    { label: "Heritage AR Storyteller", href: "/heritage" },
+    { label: "Rewards & Karma", href: "/rewards" },
+  ],
+  "Real-World Tools": [
+    { label: "Offline Remote Pass", href: "/offline-pass" },
+    { label: "Dialect & Eco Audio Guide", href: "/phrasebook" },
+    { label: "Swachh Yatra Litter Reporter", href: "/report-litter" },
+    { label: "Verifiable Certificates", href: "/certificates" },
   ],
   Community: [
-    { label: "Community Leads", href: "/community-apply" },
-    { label: "Trending Spots", href: "/trending" },
-    { label: "Certificates", href: "/certificates" },
-    { label: "Volunteer Stories", href: "/impact" },
-  ],
-  Support: [
-    { label: "Help Center", href: "#" },
-    { label: "Safety Guidelines", href: "#" },
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Impact Dashboard", href: "/impact" },
+    { label: "NSS & Volunteer Units", href: "/community-apply" },
+    { label: "Trending Underrated Spots", href: "/trending" },
+    { label: "Profile & Seva Passport", href: "/profile" },
   ],
 };
 

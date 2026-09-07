@@ -27,6 +27,7 @@ import {
   Download,
   AlertCircle,
   FileText,
+  WifiOff,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -389,7 +390,14 @@ export default function ProfilePage() {
                       )}
 
                       {booking.status === "confirmed" && (
-                        <div className="mt-4 flex justify-end gap-2 pt-2">
+                        <div className="mt-4 flex flex-wrap justify-end gap-2 pt-2">
+                          <Link
+                            href={`/offline-pass?id=${booking.id}`}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/70 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+                          >
+                            <WifiOff className="h-3.5 w-3.5 text-amber-600" />
+                            Offline Pass
+                          </Link>
                           <button
                             onClick={() => {
                               toast({ title: "Booking Slip Downloaded", message: `Slip for ${booking.id} saved.` });

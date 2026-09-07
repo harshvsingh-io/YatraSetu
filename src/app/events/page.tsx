@@ -8,6 +8,8 @@ import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
 import { cn } from "@/lib/utils";
 import QRCheckInModal from "@/components/QRCheckInModal";
+import ReportLitterModal from "@/components/ReportLitterModal";
+import Link from "next/link";
 import {
   Calendar,
   MapPin,
@@ -25,6 +27,7 @@ import {
   X,
   QrCode,
   Sparkles,
+  Camera,
 } from "lucide-react";
 
 const eventTypes = [
@@ -126,6 +129,7 @@ export default function EventsPage() {
   const [checkInModalEvent, setCheckInModalEvent] = useState<typeof events[0] | null>(null);
   const [waiverChecked, setWaiverChecked] = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [showReportLitter, setShowReportLitter] = useState(false);
 
   const filteredEvents = events.filter((e) => {
     const matchesType = activeType === "all" || e.type === activeType;
@@ -197,6 +201,47 @@ export default function EventsPage() {
                 {type.label}
               </button>
             ))}
+          </div>
+
+          {/* Swachh Yatra Citizen Action Banner */}
+          <div className="mt-8 rounded-3xl border border-earth-200 bg-gradient-to-r from-amber-900/90 via-ink-900 to-terra-900 p-5 sm:p-6 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-glow-amber">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                    Swachh Yatra Initiative
+                  </span>
+                  <span className="rounded-full bg-sage-500/30 px-2 py-0.2 text-[10px] font-bold text-sage-200">
+                    +50 Karma per Report
+                  </span>
+                </div>
+                <h3 className="font-display text-base sm:text-lg font-bold text-white mt-0.5">
+                  Spotted Litter or Plastic Waste on a Trail?
+                </h3>
+                <p className="text-xs text-white/80 mt-0.5">
+                  Snap a photo with auto-GPS coordinates to alert university NSS volunteer restoration squads.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              <button
+                onClick={() => setShowReportLitter(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-terra-500 px-4 py-2 text-xs font-bold text-white shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                <Camera className="h-3.5 w-3.5" />
+                <span>Report Litter Now</span>
+              </button>
+              <Link
+                href="/report-litter"
+                className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-all"
+              >
+                View Feed →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -453,6 +498,11 @@ export default function EventsPage() {
           event={checkInModalEvent}
         />
       )}
+
+      <ReportLitterModal
+        isOpen={showReportLitter}
+        onClose={() => setShowReportLitter(false)}
+      />
 
       <Footer />
     </main>

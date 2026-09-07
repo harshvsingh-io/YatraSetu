@@ -27,6 +27,9 @@ import {
   PhoneCall,
   Headphones,
   CheckCircle2,
+  WifiOff,
+  Languages,
+  Trash2,
 } from "lucide-react";
 import QRCheckInModal from "@/components/QRCheckInModal";
 
@@ -259,6 +262,30 @@ export default function Navbar() {
                           >
                             <Compass className="h-3.5 w-3.5 text-blue-600" />
                             Live Weather & Decongestion
+                          </Link>
+                          <Link
+                            href="/offline-pass"
+                            onClick={() => setJudgeMenuOpen(false)}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <WifiOff className="h-3.5 w-3.5 text-amber-600" />
+                            Offline Remote Travel Pass
+                          </Link>
+                          <Link
+                            href="/phrasebook"
+                            onClick={() => setJudgeMenuOpen(false)}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <Languages className="h-3.5 w-3.5 text-purple-600" />
+                            Dialect & Eco Audio Guide
+                          </Link>
+                          <Link
+                            href="/report-litter"
+                            onClick={() => setJudgeMenuOpen(false)}
+                            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:bg-earth-100"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-emerald-600" />
+                            Swachh Yatra Trail Reporter
                           </Link>
                         </div>
                       </div>

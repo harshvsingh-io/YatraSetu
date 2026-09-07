@@ -16,9 +16,12 @@ import { CardSkeleton } from "@/components/Skeleton";
 import { useLiveWeather } from "@/lib/useLiveWeather";
 import AIItineraryModal from "@/components/AIItineraryModal";
 import CityStayMap from "@/components/CityStayMap";
+import EcoSafetyAlert from "@/components/EcoSafetyAlert";
+import DialectPhrasebook from "@/components/DialectPhrasebook";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List } from "lucide-react";
+import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List, WifiOff } from "lucide-react";
 import {
   MapPin,
   Star,
@@ -378,6 +381,16 @@ export default function DiscoverPage() {
                 </a>
               ))}
             </div>
+          </div>
+
+          {/* Eco-Safety Advisory Strip */}
+          <div className="pb-6">
+            <EcoSafetyAlert
+              destination={selectedDestination}
+              temp={liveWeather.current.temp}
+              condition={liveWeather.current.condition}
+              humidity={liveWeather.current.humidity}
+            />
           </div>
         </div>
       </section>
@@ -739,6 +752,34 @@ export default function DiscoverPage() {
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Local Dialect & Cultural Eco-Etiquette Guide Section */}
+      <section className="border-t border-earth-200 bg-earth-50/70 py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 uppercase tracking-wider">
+                Cultural Respect & Connection
+              </span>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink-900 mt-2">
+                Local Dialect & Eco-Etiquette Guide
+              </h2>
+              <p className="text-xs sm:text-sm text-ink-500 mt-1 max-w-2xl">
+                Listen to authentic audio pronunciations and learn sacred ecological rules honored by village elders and Devta councils in {selectedDestination}.
+              </p>
+            </div>
+            <Link
+              href="/phrasebook"
+              className="text-xs font-bold text-amber-700 hover:text-amber-800 self-start sm:self-auto flex items-center gap-1"
+            >
+              <span>Explore All 6 Regional Phrasebooks</span>
+              <span>→</span>
+            </Link>
+          </div>
+
+          <DialectPhrasebook initialDestination={selectedDestination} />
         </div>
       </section>
 

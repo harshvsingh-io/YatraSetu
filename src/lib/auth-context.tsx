@@ -92,6 +92,7 @@ interface AuthContextType {
   updateProfile: (updates: Partial<UserProfile>) => void;
   addBooking: (booking: Omit<BookingRecord, "id" | "createdAt" | "status">) => BookingRecord;
   cancelBooking: (bookingId: string) => void;
+  addKarma: (points: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -294,6 +295,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveSession(updatedUser);
   };
 
+  const addKarma = (points: number) => {
+    if (!user) return;
+    const updatedUser: UserProfile = {
+      ...user,
+      stats: {
+        ...user.stats,
+        karmaPoints: (user.stats.karmaPoints || 0) + points,
+      },
+    };
+    saveSession(updatedUser);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -307,6 +320,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateProfile,
         addBooking,
         cancelBooking,
+        addKarma,
       }}
     >
       {children}
