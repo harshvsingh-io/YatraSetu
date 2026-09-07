@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/Button";
-import InteractiveMap from "@/components/InteractiveMap";
+import HeroJourneyShowcase from "@/components/HeroJourneyShowcase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -37,8 +37,6 @@ export default function Hero() {
   const orb1Ref = useRef<HTMLDivElement>(null);
   const orb2Ref = useRef<HTMLDivElement>(null);
   const visualRef = useRef<HTMLDivElement>(null);
-  const floatCard1Ref = useRef<HTMLDivElement>(null);
-  const floatCard2Ref = useRef<HTMLDivElement>(null);
 
   // Quick search state
   const [quickDest, setQuickDest] = useState("");
@@ -76,25 +74,6 @@ export default function Hero() {
         },
       });
 
-      // Float cards counter-motion
-      gsap.to(floatCard1Ref.current, {
-        y: -30,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.5,
-        },
-      });
-      gsap.to(floatCard2Ref.current, {
-        y: 30,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.5,
-        },
-      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -245,56 +224,14 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          {/* Right Column — Live Interactive Map */}
-          <div ref={visualRef} className="relative">
+          {/* Right Column — Live Interactive Trip & Seva Showcase */}
+          <div ref={visualRef} className="relative w-full">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, x: 30 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <div className="relative rounded-3xl border border-earth-300 bg-white p-2.5 shadow-2xl">
-                <div className="relative aspect-[4/3] min-h-[380px] sm:min-h-[440px] overflow-hidden rounded-2xl bg-ink-950">
-                  <InteractiveMap className="absolute inset-0 h-full w-full" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Floating badge 1 (Sites restored) - No raw emojis */}
-            <motion.div
-              ref={floatCard1Ref}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-              className="absolute -left-4 top-10 rounded-2xl border border-earth-200 bg-white p-3.5 shadow-xl sm:-left-8 z-20"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage-50 border border-sage-200 text-sage-700">
-                  <Sprout className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-ink-900">+342</p>
-                  <p className="text-[10px] text-ink-500 font-medium">active sites restored</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Floating badge 2 (Rewards earned) - No raw emojis */}
-            <motion.div
-              ref={floatCard2Ref}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1 }}
-              className="absolute -bottom-5 right-4 rounded-2xl border border-earth-200 bg-white p-3.5 shadow-xl sm:-right-4 z-20"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 border border-amber-200 text-amber-700">
-                  <Trophy className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-ink-900">8,400+</p>
-                  <p className="text-[10px] text-ink-500 font-medium">Green Karma rewards issued</p>
-                </div>
-              </div>
+              <HeroJourneyShowcase />
             </motion.div>
           </div>
         </div>
