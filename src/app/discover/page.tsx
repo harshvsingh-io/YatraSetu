@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import TiltCard from "@/components/TiltCard";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
+import BookingModal from "@/components/BookingModal";
 import { CardSkeleton } from "@/components/Skeleton";
 import { cn } from "@/lib/utils";
 import {
@@ -118,9 +119,9 @@ const attractions = [
 ];
 
 const transportOptions = [
-  { type: "Train", icon: Train, label: "Mumbai to Goa", time: "12h", price: "₹450" },
-  { type: "Bus", icon: Bus, label: "Mumbai to Goa", time: "10h", price: "₹800" },
-  { type: "Flight", icon: Plane, label: "Delhi to Goa", time: "2h 15m", price: "₹4,200" },
+  { type: "Train", icon: Train, label: "Mumbai → Goa", time: "12h", price: "₹450" },
+  { type: "Bus", icon: Bus, label: "Pune → Goa", time: "8h", price: "₹800" },
+  { type: "Flight", icon: Plane, label: "Delhi → Goa", time: "2h 15m", price: "₹4,200" },
 ];
 
 const filterTabs = ["All", "Hotels", "Homestays", "Resorts", "Boutique"];
@@ -131,6 +132,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState("All");
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [bookingHotel, setBookingHotel] = useState<typeof sampleHotels[0] | null>(null);
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev) => {
@@ -170,7 +172,7 @@ export default function DiscoverPage() {
               Discover {selectedDestination}
             </h1>
             <p className="mt-2 text-ink-500 sm:text-lg">
-              Live data from hotels, transport, weather, and attractions
+              Hotels, transport, weather, and attractions for your destination
             </p>
           </motion.div>
 
@@ -407,9 +409,11 @@ export default function DiscoverPage() {
                                   >
                                     <Navigation className="h-3.5 w-3.5" />
                                   </a>
-                                  <button className="flex items-center gap-1 rounded-lg bg-terra-500 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-terra-600 active:scale-95">
+                                  <button
+                                    onClick={() => setBookingHotel(hotel)}
+                                    className="flex items-center gap-1 rounded-lg bg-terra-500 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-terra-600 active:scale-95"
+                                  >
                                     Book
-                                    <ExternalLink className="h-3 w-3" />
                                   </button>
                                 </div>
                               </div>
@@ -522,6 +526,14 @@ export default function DiscoverPage() {
       </section>
 
       <Footer />
+
+      {bookingHotel && (
+        <BookingModal
+          isOpen={!!bookingHotel}
+          onClose={() => setBookingHotel(null)}
+          hotel={bookingHotel}
+        />
+      )}
     </main>
   );
 }
