@@ -244,7 +244,7 @@ export default function ImpactPage() {
                       {
                         icon: "🎯",
                         title: "1 Lakh kg",
-                        desc: "Waste collected milestone — hit in July 2024",
+                        desc: "Waste collected milestone — hit in June 2026",
                       },
                       {
                         icon: "🏆",

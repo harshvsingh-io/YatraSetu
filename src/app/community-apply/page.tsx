@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
+import SignInBanner from "@/components/SignInBanner";
 import { cn } from "@/lib/utils";
 import {
   Shield,
@@ -59,6 +60,9 @@ export default function CommunityApplyPage() {
               Apply to create and manage verified restoration events
             </p>
           </motion.div>
+          <div className="mt-4">
+            <SignInBanner message="Sign in to submit your Community Lead application." />
+          </div>
         </div>
       </section>
 

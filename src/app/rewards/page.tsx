@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
+import SignInBanner from "@/components/SignInBanner";
 import { cn } from "@/lib/utils";
 import {
   Wallet,
@@ -30,7 +31,7 @@ const earnedRewards = [
     id: 1,
     title: "Beach Cleanup Champion",
     description: "Completed 5 beach cleanup events",
-    date: "Aug 20, 2024",
+    date: "Oct 15, 2026",
     icon: "🏖️",
     type: "stamp",
   },
@@ -38,7 +39,7 @@ const earnedRewards = [
     id: 2,
     title: "Plantation Pioneer",
     description: "Planted 50+ trees across events",
-    date: "Aug 15, 2024",
+    date: "Nov 1, 2026",
     icon: "🌳",
     type: "stamp",
   },
@@ -46,7 +47,7 @@ const earnedRewards = [
     id: 3,
     title: "Heritage Guardian",
     description: "Participated in 3 heritage care events",
-    date: "Aug 10, 2024",
+    date: "Dec 6, 2026",
     icon: "🏛️",
     type: "stamp",
   },
@@ -57,7 +58,7 @@ const earnedRewards = [
     date: "Earned Aug 20",
     icon: "🏨",
     type: "coupon",
-    expires: "Nov 30, 2024",
+    expires: "Mar 31, 2027",
   },
   {
     id: 5,
@@ -66,7 +67,7 @@ const earnedRewards = [
     date: "Earned Aug 15",
     icon: "🚕",
     type: "coupon",
-    expires: "Oct 31, 2024",
+    expires: "Feb 28, 2027",
   },
 ];
 
@@ -147,6 +148,10 @@ export default function RewardsPage() {
               Earn stamps from verified events, redeem for real rewards
             </p>
           </motion.div>
+
+          <div className="mt-4">
+            <SignInBanner />
+          </div>
 
           {/* Stamp progress */}
           <SectionReveal delay={0.1}>

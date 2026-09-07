@@ -94,7 +94,7 @@ export default function ProfilePage() {
                     {name}
                   </h2>
                   <p className="text-sm text-ink-500">
-                    NSS Volunteer · Goa University · Member since Aug 2024
+                    NSS Volunteer · Goa University · Member since Oct 2026
                   </p>
                 </div>
 

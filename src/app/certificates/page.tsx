@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
+import SignInBanner from "@/components/SignInBanner";
 import { cn } from "@/lib/utils";
 import {
   Award,
@@ -22,7 +23,7 @@ const certificates = [
     id: 1,
     title: "NSS Voluntary Service Certificate",
     event: "Calangute Beach Cleanup Drive",
-    date: "Aug 18, 2024",
+    date: "Oct 15, 2026",
     location: "Calangute, Goa",
     hours: 4,
     verified: true,
@@ -33,7 +34,7 @@ const certificates = [
     id: 2,
     title: "NCC Community Service Certificate",
     event: "Mangrove Plantation — Divar Island",
-    date: "Aug 11, 2024",
+    date: "Nov 2, 2026",
     location: "Divar Island, Goa",
     hours: 6,
     verified: true,
@@ -44,7 +45,7 @@ const certificates = [
     id: 3,
     title: "NSS Voluntary Service Certificate",
     event: "Heritage Walk — Fontainhas",
-    date: "Aug 4, 2024",
+    date: "Dec 8, 2026",
     location: "Panaji, Goa",
     hours: 3,
     verified: true,
@@ -71,6 +72,9 @@ export default function CertificatesPage() {
               Auto-generated NSS/NCC certificates from verified events
             </p>
           </motion.div>
+          <div className="mt-4">
+            <SignInBanner message="Sign in to download your certificates and track event history." />
+          </div>
         </div>
       </section>
 

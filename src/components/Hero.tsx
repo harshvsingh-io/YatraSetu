@@ -8,7 +8,7 @@ import Button from "@/components/Button";
 import dynamic from "next/dynamic";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 
-const IndiaMap3D = dynamic(() => import("@/components/IndiaMap3D"), { ssr: false, loading: () => <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-ink-900 via-ink-800 to-earth-900 rounded-2xl"><div className="text-center"><div className="animate-pulse text-4xl mb-2">🗺️</div><p className="text-sm text-ink-400">Loading 3D map...</p></div></div> });
+const LeafletMap = dynamic(() => import("@/components/LeafletMap"), { ssr: false, loading: () => <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-ink-900 via-ink-800 to-earth-900 rounded-2xl"><div className="text-center"><div className="animate-pulse text-4xl mb-2">🗺️</div><p className="text-sm text-ink-400">Loading map...</p></div></div> });
 import Link from "next/link";
 
 if (typeof window !== "undefined") {
@@ -117,7 +117,7 @@ export default function Hero() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
               <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-700">
                 <Sparkles className="h-3.5 w-3.5" />
-                Smart India Hackathon 2024
+                Smart India Hackathon 2026
               </span>
             </motion.div>
 
@@ -170,7 +170,7 @@ export default function Hero() {
             <motion.div initial={{ opacity: 0, scale: 0.9, x: 40 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}>
               <div className="relative rounded-3xl border border-earth-200 bg-white p-2 shadow-2xl">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-ink-900 via-ink-800 to-earth-900">
-                  <IndiaMap3D className="absolute inset-0 h-full w-full" />
+                  <LeafletMap className="absolute inset-0 h-full w-full" zoom={4} />
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }} className="absolute bottom-4 left-4 right-4 rounded-xl bg-white/10 p-3 backdrop-blur-md z-10">
                     <div className="flex items-center justify-between">
                       <div>

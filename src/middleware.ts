@@ -29,8 +29,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes — redirect to login if not authenticated
-  const protectedRoutes = ["/profile", "/rewards", "/certificates", "/trending", "/community-apply"];
+  // Protected routes — only /profile requires auth
+  const protectedRoutes = ["/profile"];
   const isProtected = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   );

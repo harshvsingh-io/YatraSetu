@@ -19,7 +19,7 @@ export default function Partners() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionReveal>
           <p className="text-center text-sm font-medium uppercase tracking-wider text-ink-400">
-            Trusted by leading organizations
+            Built for India’s tourism & restoration ecosystem
           </p>
         </SectionReveal>
 

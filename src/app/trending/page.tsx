@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
+import SignInBanner from "@/components/SignInBanner";
 import { useToast } from "@/components/Toast";
 import { cn } from "@/lib/utils";
 import {
@@ -83,6 +84,9 @@ export default function TrendingPage() {
               Flag an overwhelmed site to help us respond before it gets worse
             </p>
           </motion.div>
+          <div className="mt-4">
+            <SignInBanner message="Sign in to submit alerts and track reports in real-time." />
+          </div>
         </div>
       </section>
 

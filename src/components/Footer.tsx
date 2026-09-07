@@ -67,7 +67,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-ink-800 py-6 sm:flex-row">
-          <p className="text-xs text-ink-600">© 2024 YatraSetu. All rights reserved. Built with ❤ for India.</p>
+          <p className="text-xs text-ink-600">© 2026 YatraSetu. All rights reserved. Built with ❤ for India.</p>
           <p className="text-xs text-ink-700">Smart India Hackathon — Yatra Bane Seva</p>
         </div>
       </div>
