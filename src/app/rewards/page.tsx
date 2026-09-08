@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,6 +9,15 @@ import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
 import SignInBanner from "@/components/SignInBanner";
 import { cn } from "@/lib/utils";
+
+const SevaMedallion3D = dynamic(() => import("@/components/3d/SevaMedallion3D"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-48 w-48 animate-pulse rounded-full bg-amber-500/10 flex items-center justify-center mx-auto">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+    </div>
+  ),
+});
 import {
   Wallet,
   Ticket,
@@ -160,39 +170,84 @@ export default function RewardsPage() {
             <SignInBanner />
           </div>
 
-          {/* Stamp progress */}
+          {/* 3D Seva Medallion & Stamp Progress Spatial Card */}
           <SectionReveal delay={0.1}>
-            <div className="mt-8 rounded-2xl border border-ink-100 bg-white p-6 sm:p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-ink-500">Your stamps</p>
-                  <div className="mt-1 flex items-baseline gap-1">
-                    <span className="font-display text-4xl font-bold text-ink-800">
-                      {userStamps}
+            <div className="mt-8 overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-earth-900 via-earth-950 to-ink-950 p-6 sm:p-8 text-white shadow-2xl relative">
+              {/* Background glowing gradient orbs */}
+              <div className="absolute top-0 right-1/4 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
+
+              <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                {/* Left side: Stats & Tier info */}
+                <div className="lg:col-span-7">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-1 text-xs font-bold text-amber-300">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Gold Seva Tier
                     </span>
-                    <span className="text-lg text-ink-400">
-                      / {totalStamps}
+                    <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-earth-200">
+                      15s Anti-Fraud Verified
                     </span>
                   </div>
+
+                  <h2 className="mt-3 font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    Verified Seva Medallion & Passport
+                  </h2>
+                  <p className="mt-1 text-sm text-earth-300 max-w-xl">
+                    Every volunteer hour at partner shrines and trails mints immutable Green Karma onto your 3D digital medallion.
+                  </p>
+
+                  <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="rounded-2xl bg-white/5 border border-white/10 p-3.5">
+                      <p className="text-[11px] font-bold text-earth-400 uppercase tracking-wider">Green Karma</p>
+                      <p className="mt-1 text-2xl font-black text-amber-400">1,450</p>
+                      <p className="text-[10px] text-emerald-400 font-semibold mt-0.5">+250 this month</p>
+                    </div>
+
+                    <div className="rounded-2xl bg-white/5 border border-white/10 p-3.5">
+                      <p className="text-[11px] font-bold text-earth-400 uppercase tracking-wider">Seva Stamps</p>
+                      <div className="mt-1 flex items-baseline gap-1">
+                        <span className="text-2xl font-black text-white">{userStamps}</span>
+                        <span className="text-xs text-earth-400">/ {totalStamps}</span>
+                      </div>
+                      <p className="text-[10px] text-earth-300 mt-0.5">8 to Platinum Tier</p>
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1 rounded-2xl bg-white/5 border border-white/10 p-3.5">
+                      <p className="text-[11px] font-bold text-earth-400 uppercase tracking-wider">Unlocked Perk</p>
+                      <p className="mt-1 text-xs font-bold text-white leading-snug">Free ASI Monument Pass</p>
+                      <p className="text-[10px] text-amber-300 mt-0.5">Ready to redeem</p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between text-xs text-earth-300 mb-2 font-medium">
+                      <span>Tier Progress</span>
+                      <span className="font-bold text-amber-400">{Math.round((userStamps / totalStamps) * 100)}% to Platinum</span>
+                    </div>
+                    <div className="h-2.5 overflow-hidden rounded-full bg-white/10 border border-white/10">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(userStamps / totalStamps) * 100}%` }}
+                        transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-emerald-400"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg">
-                  <Wallet className="h-8 w-8 text-white" />
+
+                {/* Right side: Interactive 3D Seva Medallion */}
+                <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+                  <div className="relative h-60 w-60 sm:h-64 sm:w-64 flex items-center justify-center">
+                    <SevaMedallion3D karma={1450} className="h-full w-full" />
+                  </div>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-amber-300/80">
+                    <Sparkles className="h-3 w-3 animate-spin" style={{ animationDuration: "8s" }} />
+                    <span>Interactive 3D Seva Coin · Drag to Rotate</span>
+                  </div>
                 </div>
               </div>
-
-              {/* Progress bar */}
-              <div className="mt-6 h-3 overflow-hidden rounded-full bg-ink-100">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(userStamps / totalStamps) * 100}%` }}
-                  transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                  className="h-full rounded-full bg-gradient-to-r from-amber-400 to-terra-400"
-                />
-              </div>
-
-              <p className="mt-2 text-xs text-ink-500">
-                {totalStamps - userStamps} more stamps to unlock the next reward tier
-              </p>
             </div>
           </SectionReveal>
 

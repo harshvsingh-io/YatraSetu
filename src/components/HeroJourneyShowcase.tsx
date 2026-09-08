@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -15,8 +16,19 @@ import {
   TreePine,
   Waves,
   Mountain,
+  Compass,
 } from "lucide-react";
 import Link from "next/link";
+
+const DigitalTwin3D = dynamic(() => import("@/components/3d/DigitalTwin3D"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[520px] sm:h-[580px] w-full rounded-[2rem] bg-[#171310] flex flex-col items-center justify-center text-earth-300 gap-3 border border-earth-800 shadow-2xl">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+      <p className="text-xs font-semibold tracking-wider uppercase text-amber-400">Loading 3D Digital Twin...</p>
+    </div>
+  ),
+});
 
 interface JourneyOption {
   id: string;
@@ -116,13 +128,55 @@ const journeyOptions: JourneyOption[] = [
 
 export default function HeroJourneyShowcase() {
   const [activeTab, setActiveTab] = useState<string>("tirthan");
+  const [viewMode, setViewMode] = useState<"3d" | "card">("3d");
 
   const current = journeyOptions.find((j) => j.id === activeTab) || journeyOptions[0];
 
   return (
     <div className="relative w-full max-w-xl mx-auto lg:max-w-none">
-      {/* Outer Card Container with clean warm drop-shadow */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-earth-300/80 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 shadow-[0_20px_50px_rgba(49,44,36,0.12)]">
+      {/* 3D vs Curated View Mode Pill Switcher */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="inline-flex items-center gap-1 rounded-2xl bg-earth-900/90 p-1 border border-earth-700/60 shadow-lg backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => setViewMode("3d")}
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+              viewMode === "3d"
+                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-ink-950 shadow-sm font-extrabold"
+                : "text-earth-300 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <Compass className={`h-3.5 w-3.5 ${viewMode === "3d" ? "text-ink-950" : "text-amber-400"}`} />
+            <span>🏔️ 3D Digital Twin</span>
+            {viewMode === "3d" && (
+              <span className="flex h-1.5 w-1.5 rounded-full bg-ink-950 animate-pulse" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("card")}
+            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+              viewMode === "card"
+                ? "bg-white text-ink-950 shadow-sm font-extrabold"
+                : "text-earth-300 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <Sparkles className={`h-3.5 w-3.5 ${viewMode === "card" ? "text-amber-600" : "text-amber-400"}`} />
+            <span>📋 Curated Cards</span>
+          </button>
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2 text-[11px] font-semibold text-ink-500">
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>7 Seva Waypoints Active</span>
+        </div>
+      </div>
+
+      {viewMode === "3d" ? (
+        <DigitalTwin3D />
+      ) : (
+        /* Outer Card Container with clean warm drop-shadow */
+        <div className="relative overflow-hidden rounded-[2rem] border border-earth-300/80 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 shadow-[0_20px_50px_rgba(49,44,36,0.12)]">
         {/* Destination Tabs Header */}
         <div className="flex items-center justify-between gap-1 rounded-2xl bg-earth-100/70 p-1 mb-3 border border-earth-200/60">
           <div className="flex items-center gap-1 w-full">
@@ -269,6 +323,7 @@ export default function HeroJourneyShowcase() {
           </motion.div>
         </AnimatePresence>
       </div>
+      )}
 
       {/* Floating Accent Card: Live Environmental Metric (Top-Left) */}
       <motion.div

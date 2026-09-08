@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import SectionReveal from "@/components/SectionReveal";
+import TiltCard from "@/components/TiltCard";
 import { MapPin, ArrowRight, Compass, Sparkles, ShieldCheck, Leaf } from "lucide-react";
 import type { DestinationMetric } from "@/lib/seed-data";
 
@@ -67,56 +68,58 @@ export default function UnderratedPicks() {
 
             return (
               <SectionReveal key={pick.id} delay={i * 0.06}>
-                <Link
-                  href={`/discover?q=${encodeURIComponent(pick.name)}`}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-earth-200 bg-white shadow-xs transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-amber-300"
-                >
-                  {/* Photo with gradient overlay */}
-                  <div className="relative h-56 w-full overflow-hidden bg-earth-100">
-                    <img
-                      src={photo}
-                      alt={pick.name}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/20 to-transparent" />
+                <TiltCard className="h-full">
+                  <Link
+                    href={`/discover?q=${encodeURIComponent(pick.name)}`}
+                    className="group relative flex flex-col h-full overflow-hidden rounded-3xl border border-earth-200 bg-white shadow-xs transition-all duration-300 hover:shadow-xl hover:border-amber-300"
+                  >
+                    {/* Photo with gradient overlay */}
+                    <div className="relative h-56 w-full overflow-hidden bg-earth-100">
+                      <img
+                        src={photo}
+                        alt={pick.name}
+                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/20 to-transparent" />
 
-                    {/* Top Badges */}
-                    <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white border border-white/15">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                        {pick.crowd_score}% Crowd Pressure
+                      {/* Top Badges */}
+                      <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-[11px] font-bold text-white border border-white/15">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                          {pick.crowd_score}% Crowd Pressure
+                        </span>
+                      </div>
+
+                      <span className="absolute top-3.5 right-3.5 rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-800 border border-earth-200">
+                        {pick.category.replace("_", " ")}
                       </span>
-                    </div>
 
-                    <span className="absolute top-3.5 right-3.5 rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-800 border border-earth-200">
-                      {pick.category.replace("_", " ")}
-                    </span>
-
-                    {/* Bottom Title on Image */}
-                    <div className="absolute bottom-3.5 left-3.5 right-3.5">
-                      <h3 className="font-display text-xl font-bold text-white tracking-tight">
-                        {pick.name}
-                      </h3>
-                      <div className="flex items-center gap-1 text-xs text-earth-200 mt-0.5">
-                        <MapPin className="h-3.5 w-3.5 text-amber-400" />
-                        <span>{pick.state}</span>
+                      {/* Bottom Title on Image */}
+                      <div className="absolute bottom-3.5 left-3.5 right-3.5">
+                        <h3 className="font-display text-xl font-bold text-white tracking-tight">
+                          {pick.name}
+                        </h3>
+                        <div className="flex items-center gap-1 text-xs text-earth-200 mt-0.5">
+                          <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                          <span>{pick.state}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Card Content Footer */}
-                  <div className="p-4 flex items-center justify-between border-t border-earth-100">
-                    <div className="flex items-center gap-1.5 rounded-lg bg-sage-50 px-2.5 py-1 text-xs font-bold text-sage-700 border border-sage-200/80">
-                      <Leaf className="h-3.5 w-3.5 text-sage-600" />
-                      <span>+250 Green Karma</span>
-                    </div>
+                    {/* Card Content Footer */}
+                    <div className="p-4 flex items-center justify-between border-t border-earth-100 mt-auto">
+                      <div className="flex items-center gap-1.5 rounded-lg bg-sage-50 px-2.5 py-1 text-xs font-bold text-sage-700 border border-sage-200/80">
+                        <Leaf className="h-3.5 w-3.5 text-sage-600" />
+                        <span>+250 Green Karma</span>
+                      </div>
 
-                    <div className="flex items-center gap-1 text-xs font-bold text-ink-800 group-hover:text-amber-700 transition-colors">
-                      <span>Explore Stays</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      <div className="flex items-center gap-1 text-xs font-bold text-ink-800 group-hover:text-amber-700 transition-colors">
+                        <span>Explore Stays</span>
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </TiltCard>
               </SectionReveal>
             );
           })}
