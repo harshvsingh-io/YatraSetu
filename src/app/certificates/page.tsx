@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,15 +8,6 @@ import SectionReveal from "@/components/SectionReveal";
 import Button from "@/components/Button";
 import SignInBanner from "@/components/SignInBanner";
 import { useAuth } from "@/lib/auth-context";
-
-const SevaMedallion3D = dynamic(() => import("@/components/3d/SevaMedallion3D"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-16 w-16 animate-pulse rounded-full bg-amber-500/10 flex items-center justify-center">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
-    </div>
-  ),
-});
 import { useToast } from "@/components/Toast";
 import { cn } from "@/lib/utils";
 import {
@@ -473,12 +463,9 @@ export default function CertificatesPage() {
                   </div>
 
                   <div className="flex flex-col items-center justify-center">
-                    <div className="h-20 w-20 flex items-center justify-center">
-                      <SevaMedallion3D karma={previewCert.hours * 100} className="h-full w-full" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed border-amber-600 bg-amber-50 text-[9px] font-black uppercase text-amber-900 tracking-tighter">
+                      Official Seal
                     </div>
-                    <p className="text-[9px] font-black uppercase text-amber-900 tracking-tighter mt-1">
-                      ★ 3D Seva Credential Seal ★
-                    </p>
                   </div>
 
                   <div className="text-right">

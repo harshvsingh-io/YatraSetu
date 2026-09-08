@@ -23,10 +23,9 @@ export default function TiltCard({
   const x = useMotionValue(0.5);
   const y = useMotionValue(0.5);
 
-  const springConfig = { stiffness: 200, damping: 22, mass: 0.4 };
-  const rotateX = useSpring(useTransform(y, [0, 1], [10, -10]), springConfig);
-  const rotateY = useSpring(useTransform(x, [0, 1], [-10, 10]), springConfig);
-  const scale = useSpring(isHovered ? 1.025 : 1, springConfig);
+  const springConfig = { stiffness: 150, damping: 20, mass: 0.5 };
+  const rotateX = useSpring(useTransform(y, [0, 1], [6, -6]), springConfig);
+  const rotateY = useSpring(useTransform(x, [0, 1], [-6, 6]), springConfig);
 
   const glareX = useSpring(useTransform(x, [0, 1], [0, 100]), springConfig);
   const glareY = useSpring(useTransform(y, [0, 1], [0, 100]), springConfig);
@@ -37,7 +36,7 @@ export default function TiltCard({
         Math.max(
           Math.abs(latestX - 0.5),
           Math.abs(latestY - 0.5)
-        ) * 0.5
+        ) * 0.4
     ),
     springConfig
   );
@@ -62,20 +61,16 @@ export default function TiltCard({
       style={{
         rotateX: isHovered ? rotateX : 0,
         rotateY: isHovered ? rotateY : 0,
-        scale: !disabled && isHovered ? scale : 1,
         transformPerspective: 1200,
-        transformStyle: "preserve-3d",
       }}
       className={cn(
-        "relative overflow-hidden rounded-2xl transition-all duration-300",
-        isHovered && "shadow-[0_20px_45px_rgba(0,0,0,0.12)] border-amber-300/80",
+        "relative overflow-hidden rounded-2xl transition-shadow duration-500",
+        isHovered && "shadow-card-hover",
         !disabled && "cursor-pointer",
         className
       )}
     >
-      <div style={{ transform: "translateZ(0px)" }}>
-        {children}
-      </div>
+      {children}
 
       {/* Glare overlay */}
       {!disabled && (
