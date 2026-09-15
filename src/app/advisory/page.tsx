@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CityAutocomplete from "@/components/CityAutocomplete";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldAlert,
@@ -102,14 +103,14 @@ interface AdvisoryResponse {
 export default function MountainAdvisoryPage() {
   const { toast } = useToast();
   const [selectedCorridor, setSelectedCorridor] = useState("manali");
+  const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState<AdvisoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchAdvisory = async (corridorId: string) => {
+  const fetchAdvisory = async (query: string) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/advisory?corridor=${corridorId}`);
+      const res = await fetch(`/api/advisory?q=${encodeURIComponent(query)}`);
       if (res.ok) {
         const json = await res.json();
         setData(json);
@@ -121,13 +122,28 @@ export default function MountainAdvisoryPage() {
       });
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchAdvisory(selectedCorridor);
-  }, [selectedCorridor]);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const qParam = params.get("q") || params.get("corridor");
+      if (qParam) {
+        setSelectedCorridor(qParam.toLowerCase());
+        setSearchQuery(qParam);
+        fetchAdvisory(qParam);
+        return;
+      }
+    }
+    fetchAdvisory("manali");
+  }, []);
+
+  const handleSelectCity = (cityName: string) => {
+    setSelectedCorridor(cityName.toLowerCase());
+    setSearchQuery(cityName);
+    fetchAdvisory(cityName);
+  };
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
@@ -216,31 +232,60 @@ export default function MountainAdvisoryPage() {
             </div>
           </div>
 
-          {/* Corridor Selection Pills */}
-          <div className="mt-6 flex flex-wrap gap-2 print:hidden">
+          {/* Universal City / Corridor Search Input */}
+          <div className="mt-6 max-w-2xl print:hidden">
+            <label className="block text-xs font-bold text-ink-700 uppercase tracking-wider mb-1.5">
+              Search Any City, Hill Station, or Route in India:
+            </label>
+            <CityAutocomplete
+              value={searchQuery}
+              onChange={(val) => {
+                setSearchQuery(val);
+              }}
+              onSelect={(suggestion) => {
+                handleSelectCity(suggestion.name);
+              }}
+              placeholder="Search any destination (e.g. Kedarnath, Ooty, Nainital, Mussoorie, Leh, Wayanad)..."
+            />
+          </div>
+
+          {/* Quick Popular Destination Chips */}
+          <div className="mt-4 flex flex-wrap gap-2 items-center print:hidden">
+            <span className="text-[11px] font-bold text-ink-400 uppercase tracking-wider mr-1">
+              Popular Routes:
+            </span>
             {[
               { id: "manali", label: "Manali (NH-3)", state: "Himachal" },
-              { id: "badrinath", label: "Char Dham / Badrinath (NH-58)", state: "Uttarakhand" },
+              { id: "kedarnath", label: "Kedarnath", state: "Uttarakhand" },
+              { id: "badrinath", label: "Badrinath (NH-58)", state: "Uttarakhand" },
               { id: "shimla-spiti", label: "Kinnaur & Spiti (NH-5)", state: "Himachal" },
-              { id: "munnar", label: "Munnar Gap Road (NH-85)", state: "Kerala" },
-              { id: "dharamshala", label: "Dharamshala / Kangra", state: "Himachal" },
+              { id: "nainital", label: "Nainital", state: "Uttarakhand" },
+              { id: "mussoorie", label: "Mussoorie", state: "Uttarakhand" },
+              { id: "gangtok", label: "Gangtok", state: "Sikkim" },
+              { id: "munnar", label: "Munnar (NH-85)", state: "Kerala" },
+              { id: "ooty", label: "Ooty", state: "Tamil Nadu" },
+              { id: "leh", label: "Leh Ladakh", state: "Ladakh" },
+              { id: "wayanad", label: "Wayanad", state: "Kerala" },
+              { id: "coorg", label: "Coorg", state: "Karnataka" },
+              { id: "dharamshala", label: "Dharamshala", state: "Himachal" },
             ].map((c) => (
               <button
                 key={c.id}
-                onClick={() => setSelectedCorridor(c.id)}
+                onClick={() => handleSelectCity(c.id)}
                 className={cn(
-                  "flex items-center gap-2 rounded-2xl px-4 py-2 text-xs font-bold transition-all border",
-                  selectedCorridor === c.id
+                  "flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-xs font-bold transition-all border",
+                  selectedCorridor.toLowerCase() === c.id.toLowerCase()
                     ? "bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/20"
                     : "bg-white text-ink-700 border-earth-200 hover:bg-earth-100"
                 )}
               >
-                <Car className="h-3.5 w-3.5" />
                 <span>{c.label}</span>
                 <span
                   className={cn(
-                    "rounded-md px-1.5 py-0.5 text-[9px] uppercase font-bold",
-                    selectedCorridor === c.id ? "bg-white/20 text-white" : "bg-earth-100 text-ink-500"
+                    "rounded-md px-1 py-0.5 text-[8px] uppercase font-bold",
+                    selectedCorridor.toLowerCase() === c.id.toLowerCase()
+                      ? "bg-white/20 text-white"
+                      : "bg-earth-100 text-ink-500"
                   )}
                 >
                   {c.state}

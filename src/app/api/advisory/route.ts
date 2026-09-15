@@ -392,10 +392,374 @@ const CORRIDORS: Record<string, CorridorData> = {
   },
 };
 
-export async function GET(req: NextRequest) {
-  const corridorKey = (req.nextUrl.searchParams.get("corridor") || "manali").toLowerCase();
-  const corridor = CORRIDORS[corridorKey] || CORRIDORS["manali"];
+const CITY_ALIASES: Record<string, string> = {
+  kullu: "manali",
+  mandi: "manali",
+  kasol: "manali",
+  pandoh: "manali",
+  rishikesh: "badrinath",
+  joshimath: "badrinath",
+  devprayag: "badrinath",
+  rudraprayag: "badrinath",
+  srinagar: "badrinath",
+  kedarnath: "badrinath",
+  tungnath: "badrinath",
+  chopta: "badrinath",
+  shimla: "shimla-spiti",
+  kaza: "shimla-spiti",
+  kinnaur: "shimla-spiti",
+  kalpa: "shimla-spiti",
+  kochi: "munnar",
+  adimali: "munnar",
+  idukki: "munnar",
+  mcleodganj: "dharamshala",
+  kangra: "dharamshala",
+};
 
+// Known Indian destination profiles for instant fallback
+const KNOWN_DESTINATIONS: Record<
+  string,
+  {
+    name: string;
+    state: string;
+    highway: string;
+    lat: number;
+    lng: number;
+    elevation: number;
+    baseSlope: number;
+    route: string;
+    bypassName: string;
+    bypassVia: string;
+    bypassBenefit: string;
+    chokes: { name: string; marker: string; hazard: ChokePoint["hazardType"]; desc: string; advice: string }[];
+    reliefCenter: string;
+  }
+> = {
+  kedarnath: {
+    name: "Kedarnath Mandakini Valley",
+    state: "Uttarakhand",
+    highway: "NH-107 (Rudraprayag - Gaurikund Highway)",
+    lat: 30.7346,
+    lng: 79.0669,
+    elevation: 3583,
+    baseSlope: 32,
+    route: "Rishikesh ➔ Rudraprayag ➔ Agastyamuni ➔ Guptkashi ➔ Sonprayag ➔ Kedarnath",
+    bypassName: "Mayali - Tilwara Valley Bypass",
+    bypassVia: "Ghansali ➔ Chirbatiya ➔ Mayali ➔ Tilwara ➔ Guptkashi",
+    bypassBenefit: "Avoids vulnerable Mandakini riverbank flood erosion zones.",
+    chokes: [
+      { name: "Kund-Kakragad Slide Zone", marker: "KM 42", hazard: "Mudslide", desc: "Active shale slope prone to continuous sludge flow during rains.", advice: "Transit early morning; follow SDRF flag signals." },
+      { name: "Sonprayag Parking Riverbank", marker: "KM 72", hazard: "Flash Flood", desc: "Confluence of Mandakini & Songanga rivers prone to sudden surge.", advice: "Park strictly in upper paved lots; heed siren alerts." },
+      { name: "Jungle Chatti Mule Trail Stretch", marker: "Trek KM 6", hazard: "Shooting Stones", desc: "Steep alpine scree face susceptible to rolling pebbles.", advice: "Wear trekking helmet; do not stop under sheer cliffs." },
+    ],
+    reliefCenter: "GMVN Tourist Bungalow & Guptkashi SDRF Base Camp",
+  },
+  nainital: {
+    name: "Nainital Kumaon Lake Corridor",
+    state: "Uttarakhand",
+    highway: "NH-109 (Kathgodam - Nainital Highway)",
+    lat: 29.3919,
+    lng: 79.4542,
+    elevation: 2084,
+    baseSlope: 22,
+    route: "Kathgodam ➔ Jeolikote ➔ Bhowali ➔ Tallital ➔ Nainital",
+    bypassName: "Kaladhungi - Mangoli Scenic Ridge",
+    bypassVia: "Haldwani ➔ Kaladhungi ➔ Mangoli ➔ Nainital Club Road",
+    bypassBenefit: "Gentler gradient avoiding the heavy Kathgodam landslide cuts.",
+    chokes: [
+      { name: "Jeolikote Hairpin Sector", marker: "KM 18", hazard: "Mudslide", desc: "Steep pine forest slopes prone to roadside mud accumulation.", advice: "Drive in low gear; do not overtake on blind curves." },
+      { name: "Khurpatal Viewpoint Curve", marker: "KM 26", hazard: "Dense Fog", desc: "Heavy cloud condensation dropping visibility below 15 meters.", advice: "Use yellow fog lights; maintain distance." },
+    ],
+    reliefCenter: "BD Pandey District Hospital & Community Langar Hall",
+  },
+  mussoorie: {
+    name: "Mussoorie Queen of Hills Corridor",
+    state: "Uttarakhand",
+    highway: "SH-1 (Dehradun - Mussoorie Diversion Road)",
+    lat: 30.4598,
+    lng: 78.0644,
+    elevation: 2005,
+    baseSlope: 20,
+    route: "Dehradun ➔ Rajpur Road ➔ Kuthal Gate ➔ Kolhukhet ➔ Mussoorie",
+    bypassName: "Hathipaon - Cloud End Ridge Route",
+    bypassVia: "Dehradun ➔ Kimadi ➔ Hathipaon ➔ Library Chowk",
+    bypassBenefit: "Alternative forest road with stable limestone bedrock.",
+    chokes: [
+      { name: "Kolhukhet Water Spring Curve", marker: "KM 14", hazard: "Shooting Stones", desc: "Limestone cliff face prone to small stone drops during drizzle.", advice: "Do not stop on shoulders; maintain continuous forward momentum." },
+      { name: "Kempty Fall Approach Road", marker: "KM 28", hazard: "Flash Flood", desc: "Narrow gorge road impacted by sudden waterfall overflow.", advice: "Avoid parking near natural water cascades." },
+    ],
+    reliefCenter: "St. Mary Hospital & Mussoorie Police Control Station",
+  },
+  gangtok: {
+    name: "Gangtok Teesta River Corridor",
+    state: "Sikkim",
+    highway: "NH-10 (Siliguri - Gangtok Lifeline)",
+    lat: 27.3389,
+    lng: 88.6065,
+    elevation: 1650,
+    baseSlope: 30,
+    route: "Siliguri ➔ Sevoke ➔ Teesta Bazaar ➔ Rangpo ➔ Singtam ➔ Gangtok",
+    bypassName: "Lava - Rorathang Forest Route",
+    bypassVia: "Siliguri ➔ Damdim ➔ Gorubathan ➔ Lava ➔ Rorathang ➔ Pakyong",
+    bypassBenefit: "Bypasses the chronically vulnerable lower Teesta river basin.",
+    chokes: [
+      { name: "29th Mile & Birik Dara Slide", marker: "KM 48", hazard: "Mudslide", desc: "Chronic Teesta riverbank slide active throughout monsoon.", advice: "Check BRO clearance status before departing Sevoke." },
+      { name: "Rangpo Border Checkpoint Slip", marker: "KM 74", hazard: "Shooting Stones", desc: "Unconsolidated phyllite rock faces overlooking highway.", advice: "Follow Sikkim Police pilot vehicle protocols." },
+    ],
+    reliefCenter: "STNM Multi-Speciality Hospital & Enchey Monastery Shelter",
+  },
+  leh: {
+    name: "Leh Ladakh High-Altitude Trans-Himalayan",
+    state: "Ladakh",
+    highway: "NH-1D (Srinagar - Leh Highway) / NH-3 (Manali - Leh)",
+    lat: 34.1526,
+    lng: 77.5771,
+    elevation: 3500,
+    baseSlope: 26,
+    route: "Srinagar ➔ Sonamarg ➔ Zoji La ➔ Drass ➔ Kargil ➔ Leh",
+    bypassName: "Zanskar Valley Shinku La Traverse",
+    bypassVia: "Manali ➔ Darcha ➔ Shinku La ➔ Padum ➔ Nimmu ➔ Leh",
+    bypassBenefit: "Newly opened all-weather defense road with less avalanche risk.",
+    chokes: [
+      { name: "Zoji La Pass Summit Stretch", marker: "KM 105", hazard: "Shooting Stones", desc: "Loose moraine and ice patches with steep 2,000m gorge drop.", advice: "Snow chains and high 4x4 clearance mandatory." },
+      { name: "Fotu La Pass Ridge", marker: "KM 280", hazard: "Dense Fog", desc: "Freezing blizzard conditions and sudden whiteouts.", advice: "Never travel alone; maintain convoy discipline." },
+    ],
+    reliefCenter: "SNM Hospital Leh & Mahabodhi International Meditation Shelter",
+  },
+  coorg: {
+    name: "Coorg Western Ghats Rainforest Corridor",
+    state: "Karnataka",
+    highway: "SH-88 / NH-275 (Mysore - Madikeri - Mangalore Highway)",
+    lat: 12.3375,
+    lng: 75.8069,
+    elevation: 1150,
+    baseSlope: 18,
+    route: "Mysore ➔ Hunsur ➔ Kushalnagar ➔ Madikeri ➔ Sampaje ➔ Mangalore",
+    bypassName: "Gonikoppal - Virajpet Coffee Valley Route",
+    bypassVia: "Hunsur ➔ Thithimathi ➔ Gonikoppal ➔ Virajpet ➔ Madikeri",
+    bypassBenefit: "Flat valley basin road with minimal landslide vulnerability.",
+    chokes: [
+      { name: "Sampaje Ghat Hairpin Descent", marker: "KM 95", hazard: "Mudslide", desc: "Steep rainforest slope prone to tree falls and mud slippage.", advice: "Watch for fallen eucalyptus/bamboo poles across turns." },
+      { name: "Madenadu Slip Point", marker: "KM 108", hazard: "Rockfall", desc: "Excavated slope section with seasonal rainwater seepage.", advice: "Obey Karnataka Forest Dept speed caps (30 km/h)." },
+    ],
+    reliefCenter: "Madikeri District Hospital & Sri Omkareshwara Temple Guest House",
+  },
+  ooty: {
+    name: "Nilgiri Mountain Cloud Highway",
+    state: "Tamil Nadu",
+    highway: "NH-181 (Mettupalayam - Coonoor - Ooty Ghat Road)",
+    lat: 11.4102,
+    lng: 76.695,
+    elevation: 2240,
+    baseSlope: 22,
+    route: "Coimbatore ➔ Mettupalayam ➔ Kallar ➔ Coonoor ➔ Ooty",
+    bypassName: "Kotagiri Mountain Bypass",
+    bypassVia: "Mettupalayam ➔ Kannerimukku ➔ Kotagiri ➔ Doddabetta ➔ Ooty",
+    bypassBenefit: "Wider two-lane road with significantly fewer hairpin bottlenecks.",
+    chokes: [
+      { name: "Kallar to Burliar 14 Hairpins", marker: "KM 22", hazard: "Rockfall", desc: "Steep Western Ghats cuttings prone to rolling boulders during NE monsoon.", advice: "Engage second gear; keep headlights on low-beam." },
+      { name: "Marappalam Deep Valley Curvature", marker: "KM 38", hazard: "Dense Fog", desc: "Dense cloud cover descending over tea plantation slopes.", advice: "Maintain continuous honking at narrow rock overhangs." },
+    ],
+    reliefCenter: "Ooty Govt Headquarters Hospital & Nilgiri Youth Hostel Shelter",
+  },
+  wayanad: {
+    name: "Wayanad Thamarassery Churam Corridor",
+    state: "Kerala",
+    highway: "NH-766 (Kozhikode - Kollegal Highway)",
+    lat: 11.6854,
+    lng: 76.132,
+    elevation: 900,
+    baseSlope: 24,
+    route: "Kozhikode ➔ Adivaram ➔ Thamarassery Churam ➔ Lakkidi ➔ Kalpetta",
+    bypassName: "Kuttiady Mountain Pass",
+    bypassVia: "Kozhikode ➔ Koyilandy ➔ Perambra ➔ Kuttiady ➔ Mananthavady",
+    bypassBenefit: "Gentler gradient bypassing the notorious 9 Thamarassery hairpin bends.",
+    chokes: [
+      { name: "9th Hairpin Bend Cliff Edge", marker: "KM 44", hazard: "Mudslide", desc: "Steep rainforest slope subject to heavy Western Ghats monsoon runoff.", advice: "Heavy trucks have right-of-way; do not overtake on bends." },
+      { name: "Lakkidi Gateway Gap", marker: "KM 52", hazard: "Dense Fog", desc: "Highest rainfall zone in Wayanad with sudden zero-visibility fog.", advice: "Keep hazard lights flashing in dense cloud cover." },
+    ],
+    reliefCenter: "Kalpetta General Hospital & Vythiri Community Relief Center",
+  },
+};
+
+export async function GET(req: NextRequest) {
+  const q = (req.nextUrl.searchParams.get("q") || "").trim().toLowerCase();
+  const corridorParam = (req.nextUrl.searchParams.get("corridor") || "").trim().toLowerCase();
+  const searchKey = q || corridorParam || "manali";
+
+  // Check aliases (e.g. "kullu" -> "manali", "kedarnath" -> "kedarnath")
+  const resolvedKey = CITY_ALIASES[searchKey] || searchKey;
+
+  let corridor: CorridorData;
+
+  if (CORRIDORS[resolvedKey]) {
+    corridor = CORRIDORS[resolvedKey];
+  } else if (KNOWN_DESTINATIONS[resolvedKey]) {
+    const k = KNOWN_DESTINATIONS[resolvedKey];
+    corridor = {
+      id: resolvedKey,
+      name: k.name,
+      highway: k.highway,
+      state: k.state,
+      route: k.route,
+      elevationRange: `${k.elevation}m`,
+      distanceKm: 180,
+      centerLat: k.lat,
+      centerLng: k.lng,
+      baseSlopeScore: k.baseSlope,
+      chokePoints: k.chokes.map((c, i) => ({
+        id: `${resolvedKey}-${i}`,
+        name: c.name,
+        kmMarker: c.marker,
+        hazardType: c.hazard,
+        severity: "moderate",
+        status: "monitored",
+        description: c.desc,
+        mitigationAdvice: c.advice,
+      })),
+      alternativeRoute: {
+        name: k.bypassName,
+        via: k.bypassVia,
+        extraTimeMin: 30,
+        description: `Designated safe bypass route for ${k.name} during severe weather conditions.`,
+        safetyBenefit: k.bypassBenefit,
+      },
+      emergencyHubs: [
+        {
+          name: `${k.state} State Disaster Management Authority`,
+          type: "Disaster Force",
+          phone: "1070",
+          location: "State Capital EOC",
+        },
+        {
+          name: "District Emergency Operations Center",
+          type: "Disaster Force",
+          phone: "1077",
+          location: `${k.name} District HQ`,
+        },
+        {
+          name: k.reliefCenter,
+          type: "Community Shelter",
+          phone: "112",
+          location: `${k.name} Central`,
+        },
+        {
+          name: "Police Emergency & Highway Rescue",
+          type: "Police",
+          phone: "112",
+          location: "Regional Patrol",
+        },
+      ],
+    };
+  } else {
+    // Dynamic Geocoding via OpenStreetMap Nominatim
+    let lat = 28.6139;
+    let lng = 77.209;
+    let placeName = searchKey.charAt(0).toUpperCase() + searchKey.slice(1);
+    let stateName = "India";
+    let isMountain = false;
+
+    try {
+      const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchKey)}&countrycodes=in&format=json&limit=1`;
+      const geoRes = await fetch(geoUrl, {
+        headers: { "User-Agent": "YatraSetu-SIH26202-Advisory/2.0" },
+        next: { revalidate: 86400 },
+      });
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        if (geoData && geoData.length > 0) {
+          lat = parseFloat(geoData[0].lat);
+          lng = parseFloat(geoData[0].lon);
+          placeName = geoData[0].name || placeName;
+          const displayParts = (geoData[0].display_name || "").split(",");
+          if (displayParts.length > 2) {
+            stateName = displayParts[displayParts.length - 2].trim();
+          }
+        }
+      }
+    } catch {
+      // Keep default lat/lng
+    }
+
+    // Determine terrain profile: Northern & Western coordinates indicate hill terrain
+    if (lat > 29.0 || (lat > 8.0 && lat < 14.0 && lng > 74.0 && lng < 77.5)) {
+      isMountain = true;
+    }
+
+    const baseSlope = isMountain ? 22 : 10;
+
+    corridor = {
+      id: searchKey.replace(/[^a-z0-9]/g, "-"),
+      name: `${placeName} Transit Corridor`,
+      highway: isMountain ? "State Mountain Highway & NH Link" : "National Highway Corridor",
+      state: stateName,
+      route: `Regional Hub ➔ ${placeName} Transit Route`,
+      elevationRange: isMountain ? "1,200m to 2,400m" : "200m to 600m",
+      distanceKm: 140,
+      centerLat: lat,
+      centerLng: lng,
+      baseSlopeScore: baseSlope,
+      chokePoints: [
+        {
+          id: "dyn-1",
+          name: `${placeName} Valley Approach`,
+          kmMarker: "KM 35",
+          hazardType: isMountain ? "Mudslide" : "Flash Flood",
+          severity: "moderate",
+          status: "monitored",
+          description: isMountain
+            ? "Mountain slope cutting with seasonal rainwater runoff and loose soil."
+            : "Low-lying road depression prone to water accumulation during intense downpours.",
+          mitigationAdvice: "Maintain safe following distance; do not stop under unpaved slopes.",
+        },
+        {
+          id: "dyn-2",
+          name: `${placeName} Ridge & Bend`,
+          kmMarker: "KM 68",
+          hazardType: isMountain ? "Dense Fog" : "Dense Fog",
+          severity: "low",
+          status: "clear",
+          description: "Orographic mist and passing cloud cover causing reduced visibility.",
+          mitigationAdvice: "Use low-beam headlights and reduce transit speed to 40 km/h.",
+        },
+      ],
+      alternativeRoute: {
+        name: `${placeName} Ring Road Bypass`,
+        via: `Outer Highway Link ➔ ${placeName} East Arterial`,
+        extraTimeMin: 20,
+        description: `Safer paved bypass route avoiding the inner congested bottlenecks of ${placeName}.`,
+        safetyBenefit: "Lower traffic density and reliable all-weather asphalt drainage.",
+      },
+      emergencyHubs: [
+        {
+          name: "National Emergency Life-Line",
+          type: "Disaster Force",
+          phone: "112",
+          location: "Pan-India 24x7",
+        },
+        {
+          name: `${stateName} State Disaster Control Room`,
+          type: "Disaster Force",
+          phone: "1070",
+          location: "State Disaster Management Authority",
+        },
+        {
+          name: `${placeName} Civil Hospital & Trauma Unit`,
+          type: "Hospital",
+          phone: "108",
+          location: `${placeName} Central`,
+        },
+        {
+          name: "Community Emergency Relief & Seva Center",
+          type: "Community Shelter",
+          phone: "112",
+          location: `${placeName} Town Center`,
+        },
+      ],
+    };
+  }
+
+  // Live Open-Meteo Weather Query for the corridor coordinates
   let weather = {
     temp: 21,
     condition: "Scattered Clouds",
@@ -407,7 +771,6 @@ export async function GET(req: NextRequest) {
   };
 
   try {
-    // Open-Meteo 100% Free live weather query
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${corridor.centerLat}&longitude=${corridor.centerLng}&current=temperature_2m,relative_humidity_2m,precipitation,rain,weather_code,wind_speed_10m&daily=precipitation_sum,precipitation_probability_max&timezone=Asia%2FKolkata`;
     const res = await fetch(url, { next: { revalidate: 900 } });
     if (res.ok) {
@@ -439,8 +802,7 @@ export async function GET(req: NextRequest) {
     // Graceful fallback
   }
 
-  // Scientific Landslide Hazard Index Calculation:
-  // LSI = (24h Rain * 2.8) + (Forecast Rain * 1.5) + (Wind / 3) + Base Slope Hazard
+  // Scientific Landslide / Hazard Index Calculation
   const rainScore = Math.min(45, Math.round(weather.rainPast24h * 2.8 + weather.rainForecast * 1.2));
   const windScore = Math.min(15, Math.round(weather.windSpeed / 2.5));
   const hazardScore = Math.min(100, Math.max(12, rainScore + windScore + corridor.baseSlopeScore));
@@ -451,13 +813,18 @@ export async function GET(req: NextRequest) {
 
   if (hazardScore >= 68) {
     hazardLevel = "HIGH_ALERT";
-    statusBadge = "Heavy Rainfall — Landslide Risk Active";
+    statusBadge = "Heavy Rainfall — Road Hazard Alert";
     statusColor = "rose";
   } else if (hazardScore >= 36) {
     hazardLevel = "MODERATE_CAUTION";
-    statusBadge = "Caution Advised — Daytime Transit Preferred";
+    statusBadge = "Caution Advised — Wet Pavement & Fog";
     statusColor = "amber";
   }
+
+  const allAvailable = [
+    ...Object.values(CORRIDORS).map((c) => ({ id: c.id, name: c.name, highway: c.highway, state: c.state })),
+    ...Object.entries(KNOWN_DESTINATIONS).map(([id, d]) => ({ id, name: d.name, highway: d.highway, state: d.state })),
+  ];
 
   return NextResponse.json({
     corridor,
@@ -475,12 +842,8 @@ export async function GET(req: NextRequest) {
         source: "Open-Meteo Live Hydro-Meteorological Telemetry + Geological Survey Model",
       },
     },
-    availableCorridors: Object.values(CORRIDORS).map((c) => ({
-      id: c.id,
-      name: c.name,
-      highway: c.highway,
-      state: c.state,
-    })),
+    availableCorridors: allAvailable,
     lastUpdated: new Date().toISOString(),
   });
 }
+
