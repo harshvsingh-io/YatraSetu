@@ -463,3 +463,138 @@ export const DESTINATION_BENCHMARKS: Record<string, DestinationBenchmark> = {
     ],
   },
 };
+
+export function getBenchmarkForCity(cityName: string): DestinationBenchmark {
+  if (!cityName) return DESTINATION_BENCHMARKS["General India"];
+
+  // Exact or case-insensitive match
+  const foundKey = Object.keys(DESTINATION_BENCHMARKS).find(
+    (k) =>
+      k.toLowerCase() === cityName.toLowerCase() ||
+      cityName.toLowerCase().includes(k.toLowerCase())
+  );
+  if (foundKey) return DESTINATION_BENCHMARKS[foundKey];
+
+  const lower = cityName.toLowerCase();
+  let category = "Heritage & Culture";
+  let multiplier = 1.0;
+
+  if (
+    lower.includes("shimla") ||
+    lower.includes("kasol") ||
+    lower.includes("kullu") ||
+    lower.includes("spiti") ||
+    lower.includes("dharamshala") ||
+    lower.includes("nainital") ||
+    lower.includes("mussoorie") ||
+    lower.includes("kodaikanal") ||
+    lower.includes("ooty") ||
+    lower.includes("munnar") ||
+    lower.includes("coorg") ||
+    lower.includes("leh") ||
+    lower.includes("ladakh") ||
+    lower.includes("gangtok") ||
+    lower.includes("shillong") ||
+    lower.includes("tawang") ||
+    lower.includes("chopta") ||
+    lower.includes("tirthan")
+  ) {
+    category = "Hill Station & Valley";
+    multiplier = 1.15;
+  } else if (
+    lower.includes("goa") ||
+    lower.includes("gokarna") ||
+    lower.includes("puri") ||
+    lower.includes("andaman") ||
+    lower.includes("kochi") ||
+    lower.includes("pondicherry") ||
+    lower.includes("alleppey") ||
+    lower.includes("alappuzha") ||
+    lower.includes("daman") ||
+    lower.includes("diu")
+  ) {
+    category = "Coastal & Beach";
+    multiplier = 1.1;
+  } else if (
+    lower.includes("varanasi") ||
+    lower.includes("ayodhya") ||
+    lower.includes("mathura") ||
+    lower.includes("vrindavan") ||
+    lower.includes("haridwar") ||
+    lower.includes("rishikesh") ||
+    lower.includes("tirupati") ||
+    lower.includes("madurai") ||
+    lower.includes("amritsar") ||
+    lower.includes("ujjain") ||
+    lower.includes("kedarnath") ||
+    lower.includes("badrinath") ||
+    lower.includes("bodh gaya") ||
+    lower.includes("pushkar") ||
+    lower.includes("prayagraj")
+  ) {
+    category = "Spiritual & Pilgrimage";
+    multiplier = 0.9;
+  } else if (
+    lower.includes("mumbai") ||
+    lower.includes("delhi") ||
+    lower.includes("bengaluru") ||
+    lower.includes("bangalore") ||
+    lower.includes("hyderabad") ||
+    lower.includes("kolkata") ||
+    lower.includes("chennai") ||
+    lower.includes("pune") ||
+    lower.includes("ahmedabad") ||
+    lower.includes("gurgaon") ||
+    lower.includes("noida")
+  ) {
+    category = "Metro & Urban";
+    multiplier = 1.35;
+  }
+
+  const cleanName = cityName.charAt(0).toUpperCase() + cityName.slice(1);
+  return {
+    id: `bench-${cleanName.toLowerCase().replace(/\s+/g, "-")}`,
+    name: cleanName,
+    state: "India",
+    category,
+    intercityTrainEst: Math.round(550 * multiplier),
+    intercityBusEst: Math.round(850 * multiplier),
+    intercityFlightEst: Math.round(3800 * multiplier),
+    tiers: {
+      backpacker: {
+        stayPerNight: Math.round(500 * multiplier),
+        foodPerDay: Math.round(400 * multiplier),
+        localTransportPerDay: Math.round(200 * multiplier),
+        activitiesPerDay: Math.round(200 * multiplier),
+        desc: `Budget hostel or dharamshala in ${cleanName}, street food & local shared autos.`,
+      },
+      budget: {
+        stayPerNight: Math.round(1300 * multiplier),
+        foodPerDay: Math.round(750 * multiplier),
+        localTransportPerDay: Math.round(400 * multiplier),
+        activitiesPerDay: Math.round(450 * multiplier),
+        desc: `Verified eco homestay/guest room in ${cleanName}, local cafes & 2-wheeler rental.`,
+      },
+      comfortable: {
+        stayPerNight: Math.round(3000 * multiplier),
+        foodPerDay: Math.round(1400 * multiplier),
+        localTransportPerDay: Math.round(950 * multiplier),
+        activitiesPerDay: Math.round(1100 * multiplier),
+        desc: `3-star boutique hotel with breakfast in ${cleanName}, private AC cab & guided visits.`,
+      },
+      luxury: {
+        stayPerNight: Math.round(7800 * multiplier),
+        foodPerDay: Math.round(2400 * multiplier),
+        localTransportPerDay: Math.round(2200 * multiplier),
+        activitiesPerDay: Math.round(2500 * multiplier),
+        desc: `4/5-star heritage resort in ${cleanName}, fine dining, dedicated chauffeur & VIP tours.`,
+      },
+    },
+    insiderTips: [
+      `Book transport to ${cleanName} 7-10 days in advance on IRCTC or RedBus to lock in base fares.`,
+      `Explore sacred and ecological heritage spots in ${cleanName} during early morning hours to avoid peak rush.`,
+      `Keep a 10% emergency buffer for sudden route diversions or local auto negotiations in ${cleanName}.`,
+    ],
+  };
+}
+

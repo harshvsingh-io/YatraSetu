@@ -36,7 +36,7 @@ import QRCheckInModal from "@/components/QRCheckInModal";
 
 const navLinks = [
   { href: "/discover", label: "Discover", icon: MapPin },
-  { href: "/budget", label: "Trip Budget", icon: Calculator },
+  { href: "/trip", label: "Trip Planner", icon: Calculator },
   { href: "/advisory", label: "Road Advisory", icon: Mountain },
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/certificates", label: "Certificates", icon: Award },
@@ -205,7 +205,9 @@ export default function Navbar() {
           {/* Desktop Nav Links (Spacious & Clean) */}
           <nav className="hidden items-center gap-1 lg:flex mx-2">
             {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive =
+                pathname === link.href ||
+                (link.href === "/trip" && pathname === "/budget");
               return (
                 <Link
                   key={link.href}
@@ -551,7 +553,9 @@ export default function Navbar() {
 
                 <div className="flex flex-col gap-1">
                   {navLinks.map((link) => {
-                    const isActive = pathname === link.href;
+                    const isActive =
+                      pathname === link.href ||
+                      (link.href === "/trip" && pathname === "/budget");
                     return (
                       <Link
                         key={link.href}
