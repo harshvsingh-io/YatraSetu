@@ -49,7 +49,7 @@ export default function CityAutocomplete({
         })
         .catch(() => setSuggestions([]))
         .finally(() => setLoading(false));
-    }, value.trim().length === 0 ? 0 : 150);
+    }, value.trim().length === 0 ? 0 : 80);
 
     return () => clearTimeout(timer);
   }, [value]);
@@ -65,7 +65,31 @@ export default function CityAutocomplete({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  const triggerSearch = () => {
+    if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+      handleSelect(suggestions[selectedIndex]);
+    } else if (suggestions.length > 0 && value.trim()) {
+      // If user typed and suggestions exist, pick top matched suggestion
+      handleSelect(suggestions[0]);
+    } else if (value.trim()) {
+      // Freeform city name anywhere in India
+      handleSelect({
+        name: value.trim(),
+        state: "India",
+        lat: 20.5937,
+        lng: 78.9629,
+        displayName: value.trim(),
+      });
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      triggerSearch();
+      return;
+    }
+
     if (!open || suggestions.length === 0) return;
 
     if (e.key === "ArrowDown") {
@@ -78,9 +102,6 @@ export default function CityAutocomplete({
       setSelectedIndex((prev) =>
         prev > 0 ? prev - 1 : suggestions.length - 1
       );
-    } else if (e.key === "Enter" && selectedIndex >= 0) {
-      e.preventDefault();
-      handleSelect(suggestions[selectedIndex]);
     } else if (e.key === "Escape") {
       setOpen(false);
     }
@@ -103,11 +124,25 @@ export default function CityAutocomplete({
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => suggestions.length > 0 && setOpen(true)}
         onKeyDown={handleKeyDown}
-        className="h-14 w-full rounded-2xl border-2 border-ink-200 bg-white pl-12 pr-4 text-base font-medium text-ink-800 placeholder:text-ink-300 transition-all focus:border-terra-400 focus:ring-4 focus:ring-terra-100 focus:outline-none shadow-sm"
+        className="h-14 w-full rounded-2xl border-2 border-ink-200 bg-white pl-12 pr-28 text-base font-medium text-ink-800 placeholder:text-ink-300 transition-all focus:border-terra-400 focus:ring-4 focus:ring-terra-100 focus:outline-none shadow-sm"
       />
-      {loading && (
-        <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-ink-400" />
-      )}
+      <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={triggerSearch}
+          className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 active:scale-95 transition-all"
+          title="Search destination"
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-white" />
+          ) : (
+            <>
+              <Search className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Search</span>
+            </>
+          )}
+        </button>
+      </div>
 
       <AnimatePresence>
         {open && suggestions.length > 0 && (
