@@ -29,11 +29,13 @@ import {
   WifiOff,
   Languages,
   Trash2,
+  Mountain,
 } from "lucide-react";
 import QRCheckInModal from "@/components/QRCheckInModal";
 
 const navLinks = [
   { href: "/discover", label: "Discover", icon: MapPin },
+  { href: "/advisory", label: "Road Advisory", icon: Mountain },
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/certificates", label: "Certificates", icon: Award },
   { href: "/impact", label: "Impact", icon: BarChart3 },

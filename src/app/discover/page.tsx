@@ -21,7 +21,7 @@ import DialectPhrasebook from "@/components/DialectPhrasebook";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List, WifiOff } from "lucide-react";
+import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List, WifiOff, Mountain } from "lucide-react";
 import {
   MapPin,
   Star,
@@ -369,8 +369,17 @@ export default function DiscoverPage() {
               Hotels, transport, weather, and attractions for your destination
             </p>
             {crowdData?.destination && (
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2.5">
                 <CrowdBadge crowdScore={crowdData.destination.crowd_score} />
+                {["Manali", "Kasol", "Shimla", "Munnar", "Chopta", "Rishikesh"].includes(selectedDestination) && (
+                  <Link
+                    href={`/advisory?corridor=${selectedDestination.toLowerCase() === "kasol" ? "manali" : selectedDestination.toLowerCase() === "chopta" || selectedDestination.toLowerCase() === "rishikesh" ? "badrinath" : selectedDestination.toLowerCase() === "shimla" ? "shimla-spiti" : selectedDestination.toLowerCase()}`}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors shadow-xs"
+                  >
+                    <Mountain className="h-3.5 w-3.5 text-amber-600" />
+                    <span>Live Mountain Road & Landslide Advisory ➔</span>
+                  </Link>
+                )}
               </div>
             )}
           </motion.div>
