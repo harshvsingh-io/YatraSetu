@@ -26,6 +26,7 @@ export const metadata: Metadata = {
       "Smart travel platform rerouting tourism pressure, preserving heritage with AI storytelling, and turning trips into verified restoration acts.",
     type: "website",
   },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -147,11 +148,11 @@ export default function CertificatesPage() {
 
   const handleCopyLink = (hash: string) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://yatra-setu-black.vercel.app";
-    const url = `${origin}/certificates?hash=${encodeURIComponent(hash)}`;
+    const url = `${origin}/verify/${encodeURIComponent(hash)}`;
     navigator.clipboard.writeText(url);
     toast({
-      title: "Link Copied!",
-      message: "Verifiable credential link copied to clipboard.",
+      title: "Public Verification Link Copied!",
+      message: "Direct link to /verify/" + hash + " copied to clipboard.",
     });
   };
 
@@ -361,14 +362,14 @@ export default function CertificatesPage() {
                         >
                           Preview
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyLink(cert.certHash)}
+                        <Link
+                          href={`/verify/${encodeURIComponent(cert.certHash)}`}
+                          target="_blank"
                           className="rounded-xl border border-earth-200 bg-earth-50 px-2.5 py-1.5 text-xs font-semibold text-ink-600 hover:bg-earth-100 hover:text-ink-900 transition-colors"
-                          title="Copy Verifiable Credential Link"
+                          title="Open Public Verifiable Credential URL"
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
-                        </button>
+                        </Link>
                       </div>
 
                       {cert.status === "ready" ? (

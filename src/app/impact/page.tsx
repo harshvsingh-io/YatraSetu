@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -23,46 +23,15 @@ import {
   Globe2,
   Sparkles,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 
-const impactStats = [
-  {
-    icon: TreePine,
-    value: 240000,
-    suffix: "+",
-    label: "kg waste collected",
-    color: "bg-sage-50 text-sage-600 ring-sage-100",
-    iconColor: "text-sage-500",
-    format: "number" as const,
-  },
-  {
-    icon: Users,
-    value: 18400,
-    suffix: "+",
-    label: "volunteers joined",
-    color: "bg-terra-50 text-terra-600 ring-terra-100",
-    iconColor: "text-terra-500",
-    format: "indian" as const,
-  },
-  {
-    icon: MapPin,
-    value: 342,
-    suffix: "",
-    label: "restoration sites",
-    color: "bg-amber-50 text-amber-600 ring-amber-100",
-    iconColor: "text-amber-500",
-    format: "number" as const,
-  },
-  {
-    icon: Clock,
-    value: 96000,
-    suffix: "+",
-    label: "volunteer hours",
-    color: "bg-ink-50 text-ink-600 ring-ink-100",
-    iconColor: "text-ink-500",
-    format: "number" as const,
-  },
-];
+const BASE_IMPACT = {
+  wasteKg: 240000,
+  volunteers: 18400,
+  sites: 342,
+  hours: 96000,
+};
 
 const stateData = [
   { state: "Goa", sites: 48, waste: "42,000 kg", volunteers: 3200, trend: "+12%" },
@@ -86,7 +55,7 @@ const monthlyData = [
   { month: "Aug", waste: 28, events: 42, volunteers: 3200 },
 ];
 
-const recentEvents = [
+const initialRecentEvents = [
   { name: "Juhu Beach Cleanup", date: "Sep 02, 2026", kg: "320 kg", volunteers: 86 },
   { name: "Mulki River Cleanup", date: "Aug 28, 2026", kg: "180 kg", volunteers: 42 },
   { name: "Fort Kochi Heritage Care", date: "Aug 25, 2026", kg: "95 kg", volunteers: 28 },
@@ -96,6 +65,98 @@ const recentEvents = [
 
 export default function ImpactPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "states" | "monthly">("overview");
+  const [dynamicWaste, setDynamicWaste] = useState(BASE_IMPACT.wasteKg);
+  const [dynamicVolunteers, setDynamicVolunteers] = useState(BASE_IMPACT.volunteers);
+  const [dynamicSites, setDynamicSites] = useState(BASE_IMPACT.sites);
+  const [dynamicHours, setDynamicHours] = useState(BASE_IMPACT.hours);
+  const [eventsList, setEventsList] = useState(initialRecentEvents);
+
+  useEffect(() => {
+    try {
+      // 1. Read citizen litter reports
+      const rawReports = localStorage.getItem("yatrasetu_litter_reports");
+      const reports = rawReports ? JSON.parse(rawReports) : [];
+
+      let addedKg = 0;
+      const customEvents: any[] = [];
+      const customSites = new Set<string>();
+
+      reports.forEach((r: any) => {
+        const weight = r.volume === "15kg+" ? 25 : r.volume === "5-15kg" ? 10 : 4;
+        addedKg += weight;
+        if (r.location) customSites.add(r.location);
+        customEvents.push({
+          name: `${r.location} Citizen Cleanup`,
+          date: r.date || "Just now",
+          kg: `${weight} kg`,
+          volunteers: 1,
+        });
+      });
+
+      // 2. Read user profile attendance
+      const rawUser = localStorage.getItem("yatrasetu_auth_session");
+      let userHours = 0;
+      if (rawUser) {
+        const parsed = JSON.parse(rawUser);
+        if (parsed.stats?.volunteerHours) {
+          userHours += parsed.stats.volunteerHours;
+        }
+        if (parsed.stats?.eventsAttended) {
+          userHours += parsed.stats.eventsAttended * 4;
+        }
+      }
+
+      setDynamicWaste(BASE_IMPACT.wasteKg + addedKg);
+      setDynamicVolunteers(BASE_IMPACT.volunteers + reports.length + (rawUser ? 1 : 0));
+      setDynamicSites(BASE_IMPACT.sites + customSites.size);
+      setDynamicHours(BASE_IMPACT.hours + userHours + reports.length * 2);
+
+      if (customEvents.length > 0) {
+        setEventsList([...customEvents.slice(0, 3), ...initialRecentEvents]);
+      }
+    } catch {
+      // safe fallback
+    }
+  }, []);
+
+  const impactStats = [
+    {
+      icon: TreePine,
+      value: dynamicWaste,
+      suffix: "+",
+      label: "kg waste collected",
+      color: "bg-sage-50 text-sage-600 ring-sage-100",
+      iconColor: "text-sage-500",
+      format: "number" as const,
+    },
+    {
+      icon: Users,
+      value: dynamicVolunteers,
+      suffix: "+",
+      label: "volunteers joined",
+      color: "bg-terra-50 text-terra-600 ring-terra-100",
+      iconColor: "text-terra-500",
+      format: "indian" as const,
+    },
+    {
+      icon: MapPin,
+      value: dynamicSites,
+      suffix: "",
+      label: "restoration sites",
+      color: "bg-amber-50 text-amber-600 ring-amber-100",
+      iconColor: "text-amber-500",
+      format: "number" as const,
+    },
+    {
+      icon: Clock,
+      value: dynamicHours,
+      suffix: "+",
+      label: "volunteer hours",
+      color: "bg-ink-50 text-ink-600 ring-ink-100",
+      iconColor: "text-ink-500",
+      format: "number" as const,
+    },
+  ];
 
   const maxWaste = Math.max(...stateData.map((s) => parseInt(s.waste.replace(/,/g, ""))));
 
@@ -198,11 +259,16 @@ export default function ImpactPage() {
                 {/* Recent events */}
                 <SectionReveal delay={0.1}>
                   <div className="rounded-3xl border border-earth-200 bg-white p-6 shadow-sm">
-                    <h3 className="font-display text-lg font-bold text-ink-900">
-                      Recent Verified Seva Drives
-                    </h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display text-lg font-bold text-ink-900">
+                        Recent Verified Seva Drives
+                      </h3>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-sage-50 px-2 py-0.5 text-[10px] font-bold text-sage-700 border border-sage-200">
+                        <Activity className="h-3 w-3 animate-pulse" /> Live Aggregator
+                      </span>
+                    </div>
                     <div className="mt-4 space-y-3">
-                      {recentEvents.map((event) => (
+                      {eventsList.map((event, idx) => (
                         <div
                           key={event.name}
                           className="flex items-center justify-between rounded-2xl p-3 border border-earth-100 transition-colors hover:bg-earth-50"

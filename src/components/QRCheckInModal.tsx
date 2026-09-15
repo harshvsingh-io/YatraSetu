@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   QrCode,
@@ -94,10 +94,64 @@ export default function QRCheckInModal({ isOpen, onClose, event }: QRCheckInModa
   const [geoError, setGeoError] = useState<string | null>(null);
   
   const [capturedPhoto, setCapturedPhoto] = useState(false);
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
+  const [cameraActive, setCameraActive] = useState<boolean>(false);
+  const [cameraLoading, setCameraLoading] = useState<boolean>(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const eventLat = event.lat ?? DEFAULT_EVENT_COORDS.lat;
   const eventLng = event.lng ?? DEFAULT_EVENT_COORDS.lng;
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCameraActive(false);
+  }, []);
+
+  const startCamera = useCallback(async () => {
+    setCameraError(null);
+    setCameraLoading(true);
+    try {
+      if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+        throw new Error("WebRTC camera not supported in this browser environment.");
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setCameraActive(true);
+    } catch (err: any) {
+      console.warn("Camera access note:", err.message);
+      setCameraError(err.message || "Camera access not available");
+      setCameraActive(false);
+    } finally {
+      setCameraLoading(false);
+    }
+  }, []);
+
+  // Stop camera when closing or unmounting
+  useEffect(() => {
+    if (step === "selfie" && !photoDataUrl) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => {
+      stopCamera();
+    };
+  }, [step, photoDataUrl, startCamera, stopCamera]);
 
   // Refresh TOTP code
   const refreshTOTP = useCallback(async () => {
@@ -191,7 +245,32 @@ export default function QRCheckInModal({ isOpen, onClose, event }: QRCheckInModa
   };
 
   const handleCapture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        // Draw video (unmirroring for accurate photo record)
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+        setPhotoDataUrl(dataUrl);
+        setCapturedPhoto(true);
+        stopCamera();
+        return;
+      }
+    }
+    // Fallback if camera stream was simulated
     setCapturedPhoto(true);
+    setPhotoDataUrl("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=300&fit=crop");
+    stopCamera();
+  };
+
+  const handleRetake = () => {
+    setPhotoDataUrl(null);
+    setCapturedPhoto(false);
+    startCamera();
   };
 
   const handleCompleteCheckIn = () => {
@@ -227,8 +306,10 @@ export default function QRCheckInModal({ isOpen, onClose, event }: QRCheckInModa
   };
 
   const handleClose = () => {
+    stopCamera();
     setStep("qr");
     setCapturedPhoto(false);
+    setPhotoDataUrl(null);
     setGeoStatus("idle");
     setGeoError(null);
     setUserCoords(null);
@@ -370,29 +451,82 @@ export default function QRCheckInModal({ isOpen, onClose, event }: QRCheckInModa
             </div>
 
             {/* Camera Viewfinder */}
-            <div className="relative mx-auto mt-4 flex h-48 w-full items-center justify-center rounded-2xl bg-ink-950 overflow-hidden border border-earth-300">
-              {capturedPhoto ? (
-                <div className="flex flex-col items-center justify-center text-white">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sage-500 text-white mb-2 shadow-lg">
-                    <CheckCircle2 className="h-7 w-7" />
+            <div className="relative mx-auto mt-4 flex h-52 w-full items-center justify-center rounded-2xl bg-ink-950 overflow-hidden border border-earth-300">
+              <canvas ref={canvasRef} className="hidden" />
+
+              {photoDataUrl ? (
+                <div className="relative w-full h-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photoDataUrl}
+                    alt="Captured Geotagged Selfie"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-3 text-white">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-sage-300">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Geotagged Attestation
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleRetake}
+                        className="rounded-lg bg-white/20 hover:bg-white/30 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-md"
+                      >
+                        Retake
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-white/70 font-mono mt-0.5">
+                      GPS: {userCoords?.lat.toFixed(4) || eventLat.toFixed(4)}°, {userCoords?.lng.toFixed(4) || eventLng.toFixed(4)}°
+                    </p>
                   </div>
-                  <p className="text-xs font-bold">Selfie Captured & Geotagged</p>
-                  <p className="text-[10px] text-white/60 font-mono">
-                    Lat: {userCoords?.lat.toFixed(4) || eventLat.toFixed(4)}° · Lng: {userCoords?.lng.toFixed(4) || eventLng.toFixed(4)}°
-                  </p>
+                </div>
+              ) : cameraActive ? (
+                <div className="relative w-full h-full">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover scale-x-[-1]"
+                  />
+                  <div className="absolute inset-x-0 bottom-2.5 flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={handleCapture}
+                      disabled={geoStatus !== "verified"}
+                      className="flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-ink-900 shadow-xl hover:bg-earth-100 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Camera className="h-3.5 w-3.5 text-ink-900" />
+                      <span>Snap Selfie</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center text-white/80 p-4">
-                  <Camera className="h-9 w-9 mb-2 opacity-80" />
+                <div className="flex flex-col items-center justify-center text-white/80 p-4 text-center">
+                  <Camera className="h-8 w-8 mb-1.5 opacity-80" />
                   <p className="text-xs font-semibold">Selfie Camera Verification</p>
-                  <p className="text-[10px] text-white/50 mt-0.5">Hold still with event cleanup area behind you</p>
-                  <button
-                    onClick={handleCapture}
-                    disabled={geoStatus !== "verified"}
-                    className="mt-3.5 rounded-xl bg-white/20 hover:bg-white/30 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Snap Selfie
-                  </button>
+                  <p className="text-[10px] text-white/50 mt-0.5 max-w-xs">
+                    {cameraError ? `Camera notice: ${cameraError}` : "Enable camera to snap on-site proof"}
+                  </p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      type="button"
+                      onClick={startCamera}
+                      className="rounded-xl bg-white/20 hover:bg-white/30 px-3 py-1 text-xs font-bold text-white backdrop-blur-md transition-all"
+                    >
+                      {cameraLoading ? "Activating..." : "Enable Camera"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCapturedPhoto(true);
+                        setPhotoDataUrl("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=300&fit=crop");
+                      }}
+                      className="rounded-xl bg-amber-500/30 hover:bg-amber-500/40 text-amber-200 border border-amber-400/40 px-2.5 py-1 text-[10px] font-semibold transition-all"
+                    >
+                      Simulate Frame
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
