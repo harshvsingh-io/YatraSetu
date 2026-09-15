@@ -310,19 +310,24 @@ export default function BookingModal({
                     exit={{ opacity: 0, x: -20 }}
                     className="space-y-4"
                   >
-                    <div className="rounded-xl border border-ink-200 p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-ink-100">
-                          <CreditCard className="h-5 w-5 text-ink-600" />
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
+                            <CreditCard className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-ink-800">
+                              Simulated Payment Gateway
+                            </p>
+                            <p className="text-xs text-ink-500">
+                              Zero real charges — sandbox evaluation flow
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-ink-800">
-                            Mock Payment
-                          </p>
-                          <p className="text-xs text-ink-500">
-                            No real payment — this is a demo flow
-                          </p>
-                        </div>
+                        <span className="rounded-full bg-amber-200/80 px-2.5 py-1 text-[10px] font-bold text-amber-900 border border-amber-300">
+                          Demo Sandbox
+                        </span>
                       </div>
                     </div>
                     <div className="rounded-xl bg-earth-50 p-4 space-y-2">

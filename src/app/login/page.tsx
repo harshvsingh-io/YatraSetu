@@ -281,9 +281,14 @@ export default function LoginPage() {
 
           {/* Quick Demo Judge Login Bar */}
           <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">
-              <Sparkles className="h-4 w-4 text-amber-600" />
-              <span>Judge / Demo 1-Click Access</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
+                <Sparkles className="h-4 w-4 text-amber-600" />
+                <span>Judge / Demo 1-Click Access</span>
+              </div>
+              <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-300">
+                Demo Mode — Test Flow
+              </span>
             </div>
             <p className="text-xs text-amber-800/80 mb-3">
               Instant login for testing all features without waiting for an SMS:
@@ -396,9 +401,12 @@ export default function LoginPage() {
             <div className="space-y-6">
               <div>
                 <OTPInput length={6} value={otp} onChange={setOtp} />
-                <p className="mt-3 text-center text-xs text-ink-500">
-                  Demo code auto-filled: <span className="font-bold text-amber-700">123456</span>
-                </p>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs text-ink-500">
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200">
+                    Demo Mode — Test Flow
+                  </span>
+                  <span>Sandbox OTP: <span className="font-bold text-amber-700">123456</span></span>
+                </div>
               </div>
 
               <div className="space-y-3">

@@ -35,7 +35,10 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
-  if (isProtected && !user) {
+  // Check for verified Supabase session OR active client demo session cookie
+  const ysSession = request.cookies.get("ys_session")?.value;
+
+  if (isProtected && !user && ysSession !== "active") {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("returnTo", request.nextUrl.pathname);

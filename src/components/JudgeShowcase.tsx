@@ -245,6 +245,8 @@ export default function JudgeShowcase() {
           title: "Calangute Beach Cleanup Drive",
           location: "Calangute, Goa",
           organizer: "Goa Green Brigade & NSS",
+          lat: 15.5439,
+          lng: 73.7553,
         }}
       />
     </section>

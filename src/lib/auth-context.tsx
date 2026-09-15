@@ -87,7 +87,7 @@ interface AuthContextType {
   isLoading: boolean;
   signInWithPhone: (phone: string, otp?: string, role?: UserProfile["role"]) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  signInDemo: (type?: "volunteer" | "traveler" | "student-nss") => void;
+  signInDemo: (type?: "volunteer" | "traveler" | "student-nss") => Promise<void> | void;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => void;
   addBooking: (booking: Omit<BookingRecord, "id" | "createdAt" | "status">) => BookingRecord;
@@ -226,7 +226,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { success: true };
   };
 
-  const signInDemo = (type: "volunteer" | "traveler" | "student-nss" = "volunteer") => {
+  const signInDemo = async (type: "volunteer" | "traveler" | "student-nss" = "volunteer") => {
+    // Attempt real anonymous Supabase session if configured
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (supabaseUrl && !supabaseUrl.includes("placeholder")) {
+        await supabase.auth.signInAnonymously();
+      }
+    } catch (err) {
+      console.warn("Supabase anonymous auth fallback to local session:", err);
+    }
+
     if (type === "volunteer" || type === "student-nss") {
       saveSession(DEFAULT_USER);
     } else {
