@@ -16,6 +16,7 @@ export default function CrowdBadge({ crowdScore, size = "md", className }: Crowd
 
   return (
     <span
+      title="Calculated model: 7-day booking volume + Open-Meteo weather index + seasonal modifier"
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-semibold",
         colors.bg,

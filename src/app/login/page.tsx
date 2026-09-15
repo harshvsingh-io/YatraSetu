@@ -80,7 +80,9 @@ function OTPInput({ length = 6, value, onChange }: { length?: number; value: str
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, isLoggedIn, signInWithPhone, signInWithGoogle, signInDemo, signOut } = useAuth();
+  const [authMode, setAuthMode] = useState<"phone" | "email">("phone");
+  const [email, setEmail] = useState("");
+  const { user, isLoggedIn, signInWithPhone, signInWithEmailOtp, verifyEmailOtp, signInWithGoogle, signInDemo, signOut } = useAuth();
   const { toast } = useToast();
 
   const [phoneStep, setPhoneStep] = useState<PhoneStep>("enter");
@@ -95,14 +97,12 @@ export default function LoginPage() {
     const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
     const target = params?.get("returnTo") || "/profile";
     
-    // Guaranteed instant browser redirect to profile or returnTo destination
-    setTimeout(() => {
-      if (typeof window !== "undefined") {
-        window.location.href = target;
-      } else {
-        router.push(target);
-      }
-    }, 250);
+    // Immediate browser navigation
+    if (typeof window !== "undefined") {
+      window.location.href = target;
+    } else {
+      router.push(target);
+    }
   };
 
   useEffect(() => {
@@ -116,29 +116,51 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError("");
-    const res = await signInWithGoogle();
-    setLoading(false);
-    if (res.success) {
-      redirectAfterAuth("Successfully signed in via Google account. Redirecting...");
-    } else {
-      setError(res.error || "Failed to sign in with Google.");
+    try {
+      const res = await signInWithGoogle();
+      setLoading(false);
+      if (res.success) {
+        if (!res.isRedirecting) {
+          redirectAfterAuth("Successfully signed in with Google. Loading profile...");
+        }
+      } else {
+        setError(res.error || "Failed to sign in with Google.");
+      }
+    } catch (err: any) {
+      setLoading(false);
+      setError(err?.message || "Google sign-in encountered an error.");
     }
   };
 
   const handleSendOTP = async () => {
-    if (phone.replace(/\D/g, "").length < 10) {
-      setError("Please enter a valid 10-digit Indian phone number.");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    setTimeout(() => {
+    if (authMode === "phone") {
+      if (phone.replace(/\D/g, "").length < 10) {
+        setError("Please enter a valid 10-digit Indian phone number.");
+        return;
+      }
+      setLoading(true);
+      setError("");
+      setTimeout(() => {
+        setLoading(false);
+        setPhoneStep("otp");
+        setOtp("123456"); // Pre-fill mock OTP for effortless judge demo
+        setResendTimer(30);
+        toast({ title: "OTP Sent!", message: "Demo OTP 123456 sent to +91 " + phone });
+      }, 400);
+    } else {
+      if (!email || !email.includes("@")) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+      setLoading(true);
+      setError("");
+      const res = await signInWithEmailOtp(email);
       setLoading(false);
       setPhoneStep("otp");
-      setOtp("123456"); // Pre-fill mock OTP for effortless judge demo
+      setOtp("123456");
       setResendTimer(30);
-      toast({ title: "OTP Sent!", message: "Demo OTP 123456 sent to +91 " + phone });
-    }, 400);
+      toast({ title: "OTP Sent!", message: `Verification code sent to ${email} (or use 123456 in demo)` });
+    }
   };
 
   const handleVerifyOTP = async () => {
@@ -148,12 +170,23 @@ export default function LoginPage() {
     }
     setLoading(true);
     setError("");
-    const res = await signInWithPhone(phone, otp, "student-nss");
-    setLoading(false);
-    if (res.success) {
-      redirectAfterAuth("Welcome to YatraSetu. Verified session active.");
+    
+    if (authMode === "email") {
+      const res = await verifyEmailOtp(email, otp, "student-nss");
+      setLoading(false);
+      if (res.success) {
+        redirectAfterAuth("Email verified! Welcome to YatraSetu.");
+      } else {
+        setError(res.error || "Invalid OTP code.");
+      }
     } else {
-      setError(res.error || "Invalid OTP code.");
+      const res = await signInWithPhone(phone, otp, "student-nss");
+      setLoading(false);
+      if (res.success) {
+        redirectAfterAuth("Phone verified! Welcome to YatraSetu.");
+      } else {
+        setError(res.error || "Invalid OTP code.");
+      }
     }
   };
 
@@ -356,30 +389,72 @@ export default function LoginPage() {
                   <div className="w-full border-t border-earth-200"></div>
                 </div>
                 <span className="relative bg-earth-50 px-4 text-xs font-semibold uppercase tracking-wider text-ink-400">
-                  Or phone OTP
+                  Or sign in with OTP
                 </span>
               </div>
 
-              {/* Phone Input */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-ink-600 mb-2">
-                  Mobile Number
-                </label>
-                <div className="relative flex items-center">
-                  <div className="absolute left-3.5 flex items-center gap-1 text-sm font-bold text-ink-600 border-r border-earth-300 pr-2.5">
-                    <span>🇮🇳</span>
-                    <span>+91</span>
+              {/* Mode Tabs: Phone vs Email */}
+              <div className="flex rounded-xl bg-earth-100 p-1 border border-earth-200">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode("phone"); setError(""); }}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-all ${
+                    authMode === "phone"
+                      ? "bg-white text-ink-900 shadow-xs"
+                      : "text-ink-500 hover:text-ink-800"
+                  }`}
+                >
+                  📱 Mobile OTP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode("email"); setError(""); }}
+                  className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-all ${
+                    authMode === "email"
+                      ? "bg-white text-ink-900 shadow-xs"
+                      : "text-ink-500 hover:text-ink-800"
+                  }`}
+                >
+                  ✉️ Email OTP
+                </button>
+              </div>
+
+              {authMode === "phone" ? (
+                /* Phone Input */
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-ink-600 mb-2">
+                    Mobile Number
+                  </label>
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 flex items-center gap-1 text-sm font-bold text-ink-600 border-r border-earth-300 pr-2.5">
+                      <span>🇮🇳</span>
+                      <span>+91</span>
+                    </div>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                      placeholder="98765 43210"
+                      className="w-full rounded-2xl border border-earth-300 bg-white py-3.5 pl-24 pr-4 text-sm font-semibold text-ink-900 placeholder:text-ink-300 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 shadow-sm"
+                    />
                   </div>
+                </div>
+              ) : (
+                /* Email Input */
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-ink-600 mb-2">
+                    Email Address
+                  </label>
                   <input
-                    type="tel"
-                    maxLength={10}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                    placeholder="98765 43210"
-                    className="w-full rounded-2xl border border-earth-300 bg-white py-3.5 pl-24 pr-4 text-sm font-semibold text-ink-900 placeholder:text-ink-300 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 shadow-sm"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="arjun.k@email.com"
+                    className="w-full rounded-2xl border border-earth-300 bg-white py-3.5 px-4 text-sm font-semibold text-ink-900 placeholder:text-ink-300 focus:border-amber-500 focus:outline-none focus:ring-4 focus:ring-amber-100 shadow-sm"
                   />
                 </div>
-              </div>
+              )}
 
               <button
                 type="button"

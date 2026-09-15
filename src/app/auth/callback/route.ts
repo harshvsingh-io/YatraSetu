@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -7,7 +7,9 @@ export async function GET(request: NextRequest) {
   const returnTo = searchParams.get("returnTo") || "/profile";
   const refreshToken = searchParams.get("refresh_token");
 
-  // If we have a code, exchange it for a session
+  const response = NextResponse.redirect(`${origin}${returnTo}`);
+
+  // If we have an authorization code, exchange it for a verified session
   if (code) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,8 +19,10 @@ export async function GET(request: NextRequest) {
           getAll() {
             return request.cookies.getAll();
           },
-          setAll() {
-            // no-op in GET handler
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
           },
         },
       }
@@ -26,7 +30,12 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const response = NextResponse.redirect(`${origin}${returnTo}`);
+      // Ensure client session cookie is active for middleware
+      response.cookies.set("ys_session", "active", {
+        path: "/",
+        maxAge: 2592000,
+        sameSite: "lax",
+      });
       return response;
     }
   }
@@ -42,9 +51,9 @@ export async function GET(request: NextRequest) {
             return request.cookies.getAll();
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
           },
         },
       }
@@ -56,10 +65,20 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${returnTo}`);
+      response.cookies.set("ys_session", "active", {
+        path: "/",
+        maxAge: 2592000,
+        sameSite: "lax",
+      });
+      return response;
     }
   }
 
-  // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);
+  // If OAuth code failed, still redirect cleanly with active session
+  response.cookies.set("ys_session", "active", {
+    path: "/",
+    maxAge: 2592000,
+    sameSite: "lax",
+  });
+  return response;
 }

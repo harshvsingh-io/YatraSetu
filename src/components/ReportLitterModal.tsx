@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/components/Toast";
+import { supabase } from "@/lib/supabase";
 
 interface ReportLitterModalProps {
   isOpen: boolean;
@@ -118,7 +119,7 @@ export default function ReportLitterModal({
       // Save report in local storage for community feed
       try {
         const existing = JSON.parse(localStorage.getItem("yatrasetu_litter_reports") || "[]");
-        existing.unshift({
+        const reportObj = {
           id: newTicket,
           location: locationName,
           coordinates: coordinates || "32.2396° N, 77.1887° E",
@@ -128,8 +129,32 @@ export default function ReportLitterModal({
           date: new Date().toISOString().split("T")[0],
           status: "Assigned to NSS Unit",
           photo: photoPreview,
-        });
+        };
+        existing.unshift(reportObj);
         localStorage.setItem("yatrasetu_litter_reports", JSON.stringify(existing));
+
+        // Persist to Supabase if available
+        if (supabase) {
+          supabase
+            .from("litter_reports")
+            .insert({
+              ticket_id: newTicket,
+              user_id: user?.id || null,
+              location_name: locationName,
+              coordinates: coordinates || "32.2396, 77.1887",
+              waste_category: selectedCategory,
+              volume: volume,
+              photo_url: photoPreview,
+              reporter_name: user?.name || "Mindful Volunteer",
+              status: "Assigned to NSS Unit",
+            })
+            .then(
+              ({ error }) => {
+                if (error) console.warn("Supabase litter report sync notice:", error.message);
+              },
+              () => {}
+            );
+        }
       } catch (e) {
         // ignore
       }

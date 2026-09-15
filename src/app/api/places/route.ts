@@ -39,17 +39,17 @@ const SEED_DESTINATIONS: Record<
     places: [
       {
         id: "g1",
-        name: "Taj Fort Aguada Resort & Spa",
+        name: "Fort Aguada Coastal Heritage Retreat",
         rating: 4.8,
         reviews: 3410,
         type: "Resort",
         address: "Sinquerim, Candolim, Goa",
-        priceRange: "₹9,200/night",
-        priceNum: 9200,
+        priceRange: "₹5,200/night (Est.)",
+        priceNum: 5200,
         lat: 15.4926,
         lng: 73.7741,
         photo: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&h=400&fit=crop",
-        amenities: ["Beach Access", "Pool", "Eco-Certified", "Spa"],
+        amenities: ["Beach Access", "Pool", "Eco-Certified", "Solar Power"],
       },
       {
         id: "g2",
@@ -58,7 +58,7 @@ const SEED_DESTINATIONS: Record<
         reviews: 580,
         type: "Homestay",
         address: "Loutolim, South Goa",
-        priceRange: "₹4,800/night",
+        priceRange: "₹4,800/night (Est.)",
         priceNum: 4800,
         lat: 15.3409,
         lng: 73.9896,
@@ -67,13 +67,13 @@ const SEED_DESTINATIONS: Record<
       },
       {
         id: "g3",
-        name: "ITC Grand Goa Resort",
+        name: "Arossim Palm Beach Sanctuary",
         rating: 4.7,
         reviews: 2890,
         type: "Hotel",
         address: "Arossim Beach, Cansaulim, Goa",
-        priceRange: "₹8,500/night",
-        priceNum: 8500,
+        priceRange: "₹4,500/night (Est.)",
+        priceNum: 4500,
         lat: 15.3309,
         lng: 73.8896,
         photo: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&h=400&fit=crop",
@@ -863,7 +863,7 @@ export async function GET(req: NextRequest) {
   if (matchingKey && SEED_DESTINATIONS[matchingKey]) {
     const data = SEED_DESTINATIONS[matchingKey];
     return NextResponse.json({
-      source: "verified-partners",
+      source: "curated-recommendations",
       city: q,
       places: data.places,
       attractions: data.attractions,
