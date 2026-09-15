@@ -30,11 +30,13 @@ import {
   Languages,
   Trash2,
   Mountain,
+  Calculator,
 } from "lucide-react";
 import QRCheckInModal from "@/components/QRCheckInModal";
 
 const navLinks = [
   { href: "/discover", label: "Discover", icon: MapPin },
+  { href: "/budget", label: "Trip Budget", icon: Calculator },
   { href: "/advisory", label: "Road Advisory", icon: Mountain },
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/certificates", label: "Certificates", icon: Award },

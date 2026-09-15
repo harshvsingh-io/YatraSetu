@@ -21,7 +21,7 @@ import DialectPhrasebook from "@/components/DialectPhrasebook";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
-import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List, WifiOff, Mountain } from "lucide-react";
+import { Landmark, Compass, Car, Sparkles, ShieldCheck, Map, List, WifiOff, Mountain, Calculator } from "lucide-react";
 import {
   MapPin,
   Star,
@@ -371,6 +371,13 @@ export default function DiscoverPage() {
             {crowdData?.destination && (
               <div className="mt-3 flex flex-wrap items-center gap-2.5">
                 <CrowdBadge crowdScore={crowdData.destination.crowd_score} />
+                <Link
+                  href="/budget"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-300 px-3 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-xs"
+                >
+                  <Calculator className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Trip Kitne Mein Hogi? Budget & Splitter ➔</span>
+                </Link>
                 {["Manali", "Kasol", "Shimla", "Munnar", "Chopta", "Rishikesh"].includes(selectedDestination) && (
                   <Link
                     href={`/advisory?corridor=${selectedDestination.toLowerCase() === "kasol" ? "manali" : selectedDestination.toLowerCase() === "chopta" || selectedDestination.toLowerCase() === "rishikesh" ? "badrinath" : selectedDestination.toLowerCase() === "shimla" ? "shimla-spiti" : selectedDestination.toLowerCase()}`}
