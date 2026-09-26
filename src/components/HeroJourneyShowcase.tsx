@@ -275,7 +275,7 @@ export default function HeroJourneyShowcase() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.6 }}
-        className="hidden sm:flex absolute -left-6 top-8 items-center gap-2.5 rounded-2xl border border-earth-200 bg-white/95 backdrop-blur-md px-3.5 py-2.5 shadow-xl z-20"
+        className="hidden sm:flex absolute -left-6 top-32 items-center gap-2.5 rounded-2xl border border-earth-200 bg-white/95 backdrop-blur-md px-3.5 py-2.5 shadow-xl z-20"
       >
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sage-50 text-sage-700 border border-sage-200">
           <TreePine className="h-4 w-4" />

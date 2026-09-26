@@ -112,11 +112,11 @@ export default function Navbar() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-3 inset-x-0 z-50 pointer-events-none px-3 sm:px-6 lg:px-8"
+        className="fixed top-3 inset-x-0 z-50 pointer-events-none px-2 sm:px-4 lg:px-6"
       >
         <div
           className={cn(
-            "mx-auto max-w-7xl rounded-full border transition-all duration-300 pointer-events-auto px-3.5 sm:px-5 py-2 flex items-center justify-between",
+            "mx-auto w-full max-w-[1400px] rounded-full border transition-all duration-300 pointer-events-auto px-3 sm:px-4 xl:px-5 py-2 flex items-center justify-between",
             scrolled
               ? "bg-white/95 backdrop-blur-xl border-earth-300/90 shadow-[0_12px_36px_rgba(49,44,36,0.08)] py-2"
               : "bg-white/90 backdrop-blur-lg border-earth-200/90 shadow-[0_6px_24px_rgba(49,44,36,0.04)] py-2.5"
@@ -202,8 +202,8 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav Links (Spacious & Clean) */}
-          <nav className="hidden items-center gap-1 lg:flex mx-2">
+          {/* Desktop Nav Links (Spacious, Responsive & Clean) */}
+          <nav className="hidden items-center gap-0.5 xl:gap-1 lg:flex mx-1 xl:mx-2 shrink">
             {navLinks.map((link) => {
               const isActive =
                 pathname === link.href ||
@@ -213,14 +213,14 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "relative rounded-full px-3 py-1.5 text-xs xl:text-sm font-semibold transition-all duration-200",
+                    "relative rounded-full px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-semibold transition-all duration-200 whitespace-nowrap",
                     isActive
                       ? "text-amber-900 font-bold"
                       : "text-ink-600 hover:text-ink-950 hover:bg-earth-100/70"
                   )}
                 >
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    <link.icon className="h-3.5 w-3.5 text-ink-400 group-hover:text-ink-700" />
+                  <span className="relative z-10 flex items-center gap-1 xl:gap-1.5">
+                    <link.icon className="h-3.5 w-3.5 text-ink-400 group-hover:text-ink-700 hidden xl:inline-block" />
                     <span>{link.label}</span>
                   </span>
                   {isActive && (
@@ -236,16 +236,17 @@ export default function Navbar() {
           </nav>
 
           {/* Desktop Right Side Actions */}
-          <div className="hidden items-center gap-2 lg:flex shrink-0">
+          <div className="hidden items-center gap-1.5 xl:gap-2 lg:flex shrink-0">
             {/* Judge Demo Pill */}
             <div className="relative" ref={judgeMenuRef}>
               <button
                 onClick={() => setJudgeMenuOpen(!judgeMenuOpen)}
-                className="flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/80 px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 hover:border-amber-400 transition-all shadow-2xs"
+                className="flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/80 px-2.5 xl:px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100 hover:border-amber-400 transition-all shadow-2xs whitespace-nowrap"
                 title="SIH 2026 Judge Feature Testing"
               >
                 <Zap className="h-3.5 w-3.5 text-amber-600 fill-amber-500 animate-pulse" />
-                <span>Judge Demo</span>
+                <span className="hidden xl:inline">Judge Demo</span>
+                <span className="xl:hidden">Demo</span>
                 <ChevronDown className="h-3 w-3 text-amber-700" />
               </button>
 
@@ -371,7 +372,7 @@ export default function Navbar() {
             {/* Language Switcher Pill */}
             <button
               onClick={() => setCurrentLang((prev) => (prev === "EN" ? "HI" : "EN"))}
-              className="flex items-center gap-1 rounded-full border border-earth-200 bg-earth-50/80 px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-all hover:bg-earth-100"
+              className="flex items-center gap-1 rounded-full border border-earth-200 bg-earth-50/80 px-2 xl:px-2.5 py-1.5 text-xs font-semibold text-ink-700 transition-all hover:bg-earth-100 shrink-0"
               title="Toggle Language"
             >
               <Globe className="h-3.5 w-3.5 text-amber-600" />
@@ -380,10 +381,10 @@ export default function Navbar() {
 
             {/* Authentication Actions */}
             {isLoggedIn && user ? (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative shrink-0" ref={dropdownRef}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 rounded-full border border-earth-200 bg-earth-50/70 p-1 pr-3 shadow-2xs hover:border-earth-300 transition-all"
+                  className="flex items-center gap-1.5 xl:gap-2 rounded-full border border-earth-200 bg-earth-50/70 p-1 pr-2 xl:pr-3 shadow-2xs hover:border-earth-300 transition-all shrink-0"
                 >
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-terra-500 text-xs font-bold text-white shadow-2xs">
                     {getInitials(user.name)}
@@ -480,16 +481,16 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <Link
                   href="/login"
-                  className="rounded-full px-3.5 py-1.5 text-xs xl:text-sm font-semibold text-ink-700 transition-colors hover:bg-earth-100"
+                  className="rounded-full px-2.5 xl:px-3 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:bg-earth-100 whitespace-nowrap"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/login"
-                  className="group relative overflow-hidden rounded-full bg-ink-950 px-4 py-1.5 text-xs xl:text-sm font-semibold text-white shadow-xs transition-all duration-300 hover:bg-ink-800 hover:scale-[1.02] active:scale-[0.98]"
+                  className="group relative overflow-hidden rounded-full bg-ink-950 px-3 xl:px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-all duration-300 hover:bg-ink-800 hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                 >
                   <span className="relative z-10">Get Started</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-terra-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
