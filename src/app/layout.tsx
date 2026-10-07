@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import AppProviders from "@/components/AppProviders";
@@ -36,6 +37,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1904346899385521"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="min-h-screen bg-earth-50 text-ink-800 antialiased font-sans selection:bg-amber-100 selection:text-amber-900">
         <AppProviders>{children}</AppProviders>
       </body>
